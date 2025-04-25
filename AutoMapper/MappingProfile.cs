@@ -9,6 +9,11 @@ namespace ExamNest.AutoMapper
         public MappingProfile()
         {
             CreateMap<BranchDTO,Branch>().ReverseMap();
+            CreateMap<CreateTrackDTO,Track>().ReverseMap();
+            //CreateMap<TrackDTO, Track>()
+            //    .ReverseMap()
+            //    .ForMember(dest => dest.BranchName,
+            //    opt => opt.MapFrom(src => src.Branch.BranchName));
         }
     }
 }
