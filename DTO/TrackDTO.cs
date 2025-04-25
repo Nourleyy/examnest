@@ -2,12 +2,12 @@
 
 namespace ExamNest.DTO
 {
-    public class CreateTrackDTO
+    public class TrackDTO
     {
         public int BranchId { get; set; }
         public string TrackName { get; set; }
     }
-    public class TrackDTOValidator : AbstractValidator<CreateTrackDTO>
+    public class TrackDTOValidator : AbstractValidator<TrackDTO>
     {
         public TrackDTOValidator()
         {
