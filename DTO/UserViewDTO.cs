@@ -2,7 +2,7 @@
 
 namespace ExamNest.DTO
 {
-    public class InstructorViewDTO
+    public class UserViewDTO
     {
         public int BranchId { get; set; }
         public int TrackId { get; set; }
