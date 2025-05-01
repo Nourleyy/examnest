@@ -38,6 +38,35 @@ namespace ExamNest.Controllers
             return Ok(question);
         }
 
+        [HttpGet("{id:int}/choices")]
+        public async Task<IActionResult> GetChoicesByQuestionId(int id)
+        {
+            var choices = await _context.GetProcedures().GetChoicesByQuestionAsync(id);
+            if(choices == null || choices.Count == 0)
+            {
+                return Ok("No Choices found for this Question");
+            }
+            var question = await _context.GetProcedures().GetQuestionByIDAsync(id);
+            if (question == null || question.Count == 0)
+            {
+                return Ok("No Question for this Id");
+            }
+            var grouped = question.Select(q => new QuestionWithChoicesDTO
+            {
+                QuestionId = id,
+                QuestionText = q.QuestionText,
+                QuestionType = q.QuestionType,
+                Choices = choices.Select(c => new ChoiceDTO
+                {
+                    ChoiceLetter = c.ChoiceLetter,
+                    ChoiceText = c.ChoiceText
+                }).ToList()
+            }).ToList();
+
+
+            return Ok(grouped);
+        }
+
         [HttpPost]
         public async Task<IActionResult> InsertQuestion(QuestionBankDTO question)
         {
