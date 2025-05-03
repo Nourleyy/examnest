@@ -56,8 +56,10 @@ namespace ExamNest.Controllers
                 QuestionId = id,
                 QuestionText = q.QuestionText,
                 QuestionType = q.QuestionType,
+                Points = q.Points,
                 Choices = choices.Select(c => new ChoiceDTO
                 {
+                    QuestionId = c.QuestionID,
                     ChoiceLetter = c.ChoiceLetter,
                     ChoiceText = c.ChoiceText
                 }).ToList()
