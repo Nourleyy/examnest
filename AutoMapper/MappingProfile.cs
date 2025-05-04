@@ -27,6 +27,11 @@ namespace ExamNest.AutoMapper
             CreateMap<QuestionBankDTO, QuestionBank>().ReverseMap();
             CreateMap<ChoiceDTO, Choice>().ReverseMap();
             CreateMap<ExamDTO, Exam>().ReverseMap();
+            CreateMap<SubmissionDTO, ExamSubmission>()
+                .ReverseMap()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Student.User.Name))
+                .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Exam.Course.CourseName));
+
         }
     }
 }

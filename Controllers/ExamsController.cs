@@ -70,6 +70,22 @@ namespace ExamNest.Controllers
             return Ok(grouped);
         }
 
+        [HttpGet("student-results")]
+        public async Task<IActionResult> GetStudentExamResults([FromQuery] int studentId, [FromQuery] int? examId = null)
+        {
+            if (studentId <= 0)
+                return BadRequest("Invalid student ID.");
+            try
+            {
+                var results = await _context.GetProcedures().GetStudentExamResultsAsync(studentId, examId);
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateExam(ExamInputDTO exam)
         {
@@ -85,13 +101,14 @@ namespace ExamNest.Controllers
             }catch (Exception ex) { return  BadRequest(ex.Message); }
         }
 
+
         [HttpPut]
         public async Task<IActionResult> UpdateExam(int id, DateTime date)
         {
             var exam = await _context.Exams.FindAsync(id);
             if (exam == null)
             {
-                return NotFound($"No Exam found with ID = {id}");
+                return Ok($"No exam foudn with this Id = {id}");
             }
 
             if (date < DateTime.Today)
