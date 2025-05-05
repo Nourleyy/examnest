@@ -1,5 +1,5 @@
 ﻿using ExamNest.DTO;
-using ExamNest.Repositories;
+using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers

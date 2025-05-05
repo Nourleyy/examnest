@@ -1,4 +1,5 @@
 using ExamNest.Extensions;
+using ExamNest.Interfaces;
 using ExamNest.Models;
 using ExamNest.Repositories;
 using Microsoft.EntityFrameworkCore;

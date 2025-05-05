@@ -1,15 +1,8 @@
-﻿using ExamNest.Models;
+﻿using ExamNest.Interfaces;
+using ExamNest.Models;
 
 namespace ExamNest.Repositories
 {
-    public interface IBranchRepository
-    {
-        Task<IEnumerable<DeleteBranchResult>> Delete(int id);
-        Task<IEnumerable<GetAllBranchesResult>> GetAll();
-        Task<IEnumerable<GetBranchByIDResult>> GetById(int id);
-        Task<IEnumerable<CreateBranchResult>> Insert(string branchName);
-        Task<IEnumerable<UpdateBranchResult>> Update(int id, string branchName);
-    }
 
     public class BranchRepository : GenericRepository, IBranchRepository
     {
