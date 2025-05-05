@@ -23,8 +23,9 @@ namespace ExamNest
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddDbContext<AppDBContext>(
             options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+            // TODO: Extension to builder to have the all repositories registered in single file
             builder.Services.AddScoped<IBranchRepository, BranchRepository>();
+            builder.Services.AddScoped<IChoiceRepository, ChoiceRepository>();
 
             var app = builder.Build();
 

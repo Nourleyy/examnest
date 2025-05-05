@@ -1,7 +1,6 @@
-﻿using AutoMapper;
-using ExamNest.DTO;
+﻿using ExamNest.DTO;
+using ExamNest.Interfaces;
 using ExamNest.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
@@ -11,19 +10,19 @@ namespace ExamNest.Controllers
     public class ChoicesController : ControllerBase
     {
         private readonly AppDBContext _context;
-        private readonly IMapper _mapper;
+        private readonly IChoiceRepository choiceRepository;
 
-        public ChoicesController(AppDBContext context, IMapper mapper)
+        public ChoicesController(AppDBContext context, IChoiceRepository _choiceRepository)
         {
             _context = context;
-            _mapper = mapper;
+            choiceRepository = _choiceRepository;
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var choice = await _context.GetProcedures().GetChoiceByIDAsync(id);
-            if (choice.Count == 0)
+            var choice = await choiceRepository.GetById(id);
+            if (choice == null)
             {
                 return Ok();
             }
@@ -31,34 +30,23 @@ namespace ExamNest.Controllers
         }
 
         [HttpPost]
+        //  @Nourleyy, Fluent Validation Automatically validate the model state, we don't need to do it manually
+
         public async Task<IActionResult> InsertChoice(ChoiceDTO choice)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var questionSearch = _context.QuestionBanks.FirstOrDefault(q => q.QuestionId == choice.QuestionId);
-            if (questionSearch == null)
-            {
-                return BadRequest("Question Id not found");
-            }
-            var result = await _context.GetProcedures().CreateChoiceAsync(choice.QuestionId, choice.ChoiceLetter, choice.ChoiceText);
+
+            var result = await choiceRepository.Create(choice);
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateChoice(ChoiceDTO choice, int id)
         {
-            var questionSearch = _context.QuestionBanks.FirstOrDefault(q => q.QuestionId == choice.QuestionId);
-            if (questionSearch == null)
+            var result = await choiceRepository.Update(choice, id);
+            if (result == false)
             {
-                return BadRequest("Question Id not found");
+                return BadRequest("Update failed");
             }
-            var result = await _context.GetProcedures().UpdateChoiceAsync(id, choice.ChoiceLetter, choice.ChoiceText);
-            if (result[0].RowsUpdated == 0)
-            {
-                return Ok();
-            }
-            return Ok(result);
+            return Ok();
         }
 
         [HttpDelete]

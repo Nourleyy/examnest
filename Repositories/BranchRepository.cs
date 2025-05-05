@@ -18,17 +18,19 @@ namespace ExamNest.Repositories
         {
             return await appDBContextProcedures.GetBranchByIDAsync(id);
         }
-        public async Task<IEnumerable<UpdateBranchResult>> Update(int id, string branchName)
+        public async Task<bool> Update(int id, string branchName)
         {
-            return await appDBContextProcedures.UpdateBranchAsync(id, branchName);
+            var Updated = await appDBContextProcedures.UpdateBranchAsync(id, branchName);
+            return Updated[0].RowsUpdated > 0;
         }
         public async Task<IEnumerable<CreateBranchResult>> Insert(string branchName)
         {
             return await appDBContextProcedures.CreateBranchAsync(branchName);
         }
-        public async Task<IEnumerable<DeleteBranchResult>> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            return await appDBContextProcedures.DeleteBranchAsync(id);
+            var Deleted = await appDBContextProcedures.DeleteBranchAsync(id);
+            return Deleted[0].RowsDeleted > 0;
         }
 
     }

@@ -47,10 +47,7 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> UpdateBranch(BranchDTO branch, int id)
         {
             var result = await branchRepository.Update(id, branch.BranchName);
-            if (result.Count() == 0)
-            {
-                return NotFound();
-            }
+
             return Ok(result);
         }
 
