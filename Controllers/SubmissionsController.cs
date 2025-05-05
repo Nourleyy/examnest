@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
-using Azure.Core;
 using ExamNest.DTO;
 using ExamNest.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -28,7 +26,7 @@ namespace ExamNest.Controllers
             var submissions = _context.ExamSubmissions
                 .Include(s => s.Student)
                 .ThenInclude(st => st.User)
-                .Include(s=> s.Exam)
+                .Include(s => s.Exam)
                 .ThenInclude(st => st.Course)
                 .ToList();
             return Ok(_mapper.Map<List<SubmissionDTO>>(submissions));
@@ -79,15 +77,15 @@ namespace ExamNest.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertSubmission(SubmissionInputDTO request)
         {
-           if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Model State");
+                return BadRequest("Model State"); // xD
             }
 
             try
             {
                 var answersJson = JsonConvert.SerializeObject(request.Answers);
-                var result = await _context.GetProcedures().SubmitExamAnswersAsync(request.ExamID,request.StudentID, answersJson);
+                var result = await _context.GetProcedures().SubmitExamAnswersAsync(request.ExamID, request.StudentID, answersJson);
 
                 return Ok(result);
             }
