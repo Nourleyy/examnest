@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using ExamNest.DTO;
 using ExamNest.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,11 +20,17 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
-        public  IActionResult GetExams()
+        public IActionResult GetExams()
         {
             var exams = _context.Exams
                 .Include(c => c.Course)
-                .ToList();
+                .Select(e => new ExamDTO
+                {
+                    ExamId = e.ExamId,
+                    CourseId = e.CourseId,
+                    CourseName = e.Course.CourseName,
+                    ExamDate = e.ExamDate
+                }).ToList();
             return Ok(_mapper.Map<List<ExamDTO>>(exams));
         }
 
@@ -59,7 +64,7 @@ namespace ExamNest.Controllers
                 QuestionText = q.QuestionText,
                 QuestionType = q.QuestionType,
                 Points = q.Points,
-                Choices = choices.Where(c=>c.QuestionID == q.QuestionID).Select(c => new ChoiceDTO
+                Choices = choices.Where(c => c.QuestionID == q.QuestionID).Select(c => new ChoiceDTO
                 {
                     QuestionId = c.QuestionID,
                     ChoiceLetter = c.ChoiceLetter,
@@ -95,10 +100,11 @@ namespace ExamNest.Controllers
             }
             try
             {
-                var examId =  await _context.GetProcedures().CreateExamAndGetIdAsync(exam.CourseId,exam.NoOfQuestions,exam.ExamDate);
+                var examId = await _context.GetProcedures().CreateExamAndGetIdAsync(exam.CourseId, exam.NoOfQuestions, exam.ExamDate);
                 return Ok(examId);
 
-            }catch (Exception ex) { return  BadRequest(ex.Message); }
+            }
+            catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
 

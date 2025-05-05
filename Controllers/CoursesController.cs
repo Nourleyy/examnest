@@ -1,7 +1,5 @@
-﻿using AutoMapper;
-using ExamNest.DTO;
+﻿using ExamNest.DTO;
 using ExamNest.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
@@ -11,12 +9,10 @@ namespace ExamNest.Controllers
     public class CoursesController : ControllerBase
     {
         private readonly AppDBContext _context;
-        private readonly IMapper _mapper;
 
-        public CoursesController(AppDBContext context, IMapper mapper)
+        public CoursesController(AppDBContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         [HttpGet]
