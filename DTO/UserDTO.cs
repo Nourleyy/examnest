@@ -2,15 +2,15 @@
 
 namespace ExamNest.DTO
 {
-    public class InstructorDTO
+    public class UserDTO
     {
         public int BranchId { get; set; }
         public int TrackId { get; set; }
         public int UserId { get; set; }
     }
-    public class InstructorDTOValidator : AbstractValidator<InstructorDTO>
+    public class UserDTOValidator : AbstractValidator<UserDTO>
     {
-        public InstructorDTOValidator()
+        public UserDTOValidator()
         {
             RuleFor(b => b.BranchId)
                  .NotEmpty().WithMessage("Branch Id is required.")
