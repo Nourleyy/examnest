@@ -1,9 +1,6 @@
-
-using ExamNest.DTO;
 using ExamNest.Extensions;
 using ExamNest.Models;
-using FluentValidation;
-using FluentValidation.AspNetCore;
+using ExamNest.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamNest
@@ -24,7 +21,9 @@ namespace ExamNest
             builder.Services.AddOpenApi();
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddDbContext<AppDBContext>(
-        options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddScoped<IBranchRepository, BranchRepository>();
 
             var app = builder.Build();
 

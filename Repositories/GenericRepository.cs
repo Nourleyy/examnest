@@ -1,0 +1,23 @@
+﻿using ExamNest.Models;
+
+namespace ExamNest.Repositories
+{
+
+    public abstract class GenericRepository
+    {
+        private readonly AppDBContext _appDBContext;
+        protected readonly IAppDBContextProcedures appDBContextProcedures;
+        public GenericRepository(AppDBContext appDB)
+        {
+
+            _appDBContext = appDB;
+            appDBContextProcedures = _appDBContext.GetProcedures();
+
+        }
+
+
+
+    }
+
+
+}
