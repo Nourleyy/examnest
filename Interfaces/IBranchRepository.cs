@@ -1,13 +1,13 @@
-﻿using ExamNest.Models;
+﻿using ExamNest.DTO;
+using ExamNest.Models;
 
 namespace ExamNest.Interfaces
 {
-    public interface IBranchRepository
+    public interface IBranchRepository : IGeneric<BranchDTO>
     {
-        Task<bool> Delete(int id);
+
         Task<IEnumerable<GetAllBranchesResult>> GetAll();
         Task<IEnumerable<GetBranchByIDResult>> GetById(int id);
-        Task<IEnumerable<CreateBranchResult>> Insert(string branchName);
-        Task<bool> Update(int id, string branchName);
+
     }
 }

@@ -3,7 +3,7 @@
 namespace ExamNest.Repositories
 {
 
-    public abstract class GenericRepository
+    public abstract partial class GenericRepository
     {
         private readonly AppDBContext _appDBContext;
         protected readonly IAppDBContextProcedures appDBContextProcedures;
@@ -17,7 +17,6 @@ namespace ExamNest.Repositories
 
 
 
+
     }
-
-
 }

@@ -4,17 +4,17 @@ using ExamNest.Models;
 
 namespace ExamNest.AutoMapper
 {
-    public class MappingProfile:Profile
+    public class MappingProfile : Profile
     {
         public MappingProfile()
         {
-            CreateMap<BranchDTO,Branch>().ReverseMap();
-            CreateMap<TrackDTO,Track>().ReverseMap();
-            CreateMap<CourseDTO,Course>().ReverseMap();
-            CreateMap<UserDTO,Instructor>().ReverseMap();
+            CreateMap<BranchDTO, Branch>().ReverseMap();
+            CreateMap<TrackDTO, Track>().ReverseMap();
+            CreateMap<CourseDTO, Course>().ReverseMap();
+            CreateMap<UserDTO, Instructor>().ReverseMap();
             CreateMap<UserViewDTO, Instructor>()
                 .ReverseMap()
-                .ForMember(dest => dest.BranchName, opt=> opt.MapFrom(src=>src.Branch.BranchName))
+                .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.Branch.BranchName))
                 .ForMember(dest => dest.TrackName, opt => opt.MapFrom(src => src.Track.TrackName))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User.Name))
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
@@ -31,6 +31,9 @@ namespace ExamNest.AutoMapper
                 .ReverseMap()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Student.User.Name))
                 .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Exam.Course.CourseName));
+
+
+
 
         }
     }

@@ -33,15 +33,17 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> InsertBranch(BranchDTO branch)
         {
 
-            var result = await branchRepository.Insert(branch.BranchName);
+
+
+            var result = await branchRepository.Create(branch);
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateBranch(BranchDTO branch, int id)
         {
-            var result = await branchRepository.Update(id, branch.BranchName);
+            var result = await branchRepository.Update(id, branch);
 
-            return result ? Ok() : BadRequest("Update failed");
+            return Ok(result);
 
         }
 

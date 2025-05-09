@@ -1,8 +1,7 @@
-﻿using System.Diagnostics;
-using AutoMapper;
-using ExamNest.DTO;
+﻿using ExamNest.DTO;
+using ExamNest.Interfaces;
 using ExamNest.Models;
-using Microsoft.AspNetCore.Http;
+using ExamNest.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
@@ -11,30 +10,26 @@ namespace ExamNest.Controllers
     [ApiController]
     public class TracksController : ControllerBase
     {
-        private readonly AppDBContext _context;
-        private readonly IMapper _mapper;
+        private readonly IBranchRepository branchRepository;
+        private readonly ITrackRepository trackRepository;
 
-        public TracksController(AppDBContext context, IMapper mapper)
+        public TracksController(AppDBContext context, IBranchRepository _branchRepository, ITrackRepository _trackRepository)
         {
-            _context = context;
-            _mapper = mapper;
+            branchRepository = _branchRepository;
+            trackRepository = _trackRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetTracks()
         {
-            var tracks = await _context.GetProcedures().GetAllTracksAsync();
+            var tracks = await trackRepository.GetAll();
             return Ok(tracks);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var tracks = await _context.GetProcedures().GetTrackByIDAsync(id);
-            if (tracks.Count == 0)
-            {
-                return NotFound();
-            }
+            var tracks = await trackRepository.GetById(id);
 
             return Ok(tracks);
         }
@@ -42,31 +37,25 @@ namespace ExamNest.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertTrack(TrackDTO track)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var branchSearch = _context.Branches.FirstOrDefault(b => b.BranchId == track.BranchId);
+
+            var branchSearch = await branchRepository.GetById(track.BranchId);
             if (branchSearch == null)
             {
                 return BadRequest("Branch Id not found");
             }
-            var result = await _context.GetProcedures().CreateTrackAsync(track.BranchId,track.TrackName);
+            var result = await trackRepository.Create(track);
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateBranch(TrackDTO track, int id)
         {
-            var branchSearch = _context.Branches.FirstOrDefault(b => b.BranchId == track.BranchId);
+            var branchSearch = await branchRepository.GetById(track.BranchId);
             if (branchSearch == null)
             {
                 return BadRequest("Branch Id not found");
             }
-            var result = await _context.GetProcedures().UpdateTrackAsync(id,track.BranchId, track.TrackName);
-            if (result[0].RowsUpdated == 0)
-            {
-                return NotFound();
-            }
+            var result = await trackRepository.Update(id, track);
+
             return Ok(result);
         }
 
@@ -75,7 +64,7 @@ namespace ExamNest.Controllers
         {
             try
             {
-                var result = await _context.GetProcedures().DeleteTrackAsync(id);
+                var result = await trackRepository.Delete(id);
                 return Ok(result);
             }
             catch (Exception ex) { return BadRequest(ex.Message); }

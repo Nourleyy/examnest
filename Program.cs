@@ -26,6 +26,8 @@ namespace ExamNest
             // TODO: Extension to builder to have the all repositories registered in single file
             builder.Services.AddScoped<IBranchRepository, BranchRepository>();
             builder.Services.AddScoped<IChoiceRepository, ChoiceRepository>();
+            builder.Services.AddScoped<ICoursesRepository, CoursesRepository>();
+            builder.Services.AddScoped<ITrackRepository, TracksRepository>();
 
             var app = builder.Build();
 

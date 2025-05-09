@@ -20,10 +20,7 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var choice = await choiceRepository.GetById(id);
-            if (choice == null)
-            {
-                return Ok();
-            }
+
             return Ok(choice);
         }
 
@@ -37,8 +34,8 @@ namespace ExamNest.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateChoice(ChoiceDTO choice, int id)
         {
-            var result = await choiceRepository.Update(choice, id);
-            return result ? Ok() : BadRequest("Update failed");
+            var result = await choiceRepository.Update(id, choice);
+            return Ok(result);
 
         }
 

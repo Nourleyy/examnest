@@ -17,17 +17,17 @@ namespace ExamNest.Repositories
 
             return ChoiceList.FirstOrDefault();
         }
-        public async Task<bool> Create(ChoiceDTO choice)
+        public async Task<ChoiceDTO?> Create(ChoiceDTO choice)
         {
             var ListCreated = await appDBContextProcedures.CreateChoiceAsync(choice.QuestionId, choice.ChoiceLetter, choice.ChoiceText);
 
-            return ListCreated.Count > 0;
+            return ListCreated.Count > 0 ? choice : null;
         }
 
-        public async Task<bool> Update(ChoiceDTO choice, int id)
+        public async Task<ChoiceDTO?> Update(int id, ChoiceDTO choice)
         {
             var ListUpdated = await appDBContextProcedures.UpdateChoiceAsync(id, choice.ChoiceLetter, choice.ChoiceText);
-            return ListUpdated[0].RowsUpdated > 0;
+            return ListUpdated.Count > 0 ? choice : null;
         }
 
         public async Task<bool> Delete(int id)
