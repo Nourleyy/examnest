@@ -37,10 +37,7 @@ namespace ExamNest.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertCourse(CourseDTO course)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+
             var trackSearch = _context.Tracks.FirstOrDefault(t => t.TrackId == course.TrackId);
             if (trackSearch == null)
             {

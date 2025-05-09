@@ -9,12 +9,10 @@ namespace ExamNest.Controllers
     [ApiController]
     public class ChoicesController : ControllerBase
     {
-        private readonly AppDBContext _context;
         private readonly IChoiceRepository choiceRepository;
 
         public ChoicesController(AppDBContext context, IChoiceRepository _choiceRepository)
         {
-            _context = context;
             choiceRepository = _choiceRepository;
         }
 
@@ -30,7 +28,6 @@ namespace ExamNest.Controllers
         }
 
         [HttpPost]
-        //  @Nourleyy, Fluent Validation Automatically validate the model state, we don't need to do it manually
 
         public async Task<IActionResult> InsertChoice(ChoiceDTO choice)
         {
@@ -54,7 +51,7 @@ namespace ExamNest.Controllers
         {
             try
             {
-                var result = await _context.GetProcedures().DeleteChoiceAsync(id);
+                var result = await choiceRepository.Delete(id);
                 return Ok(result);
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
