@@ -31,7 +31,6 @@ namespace ExamNest.Controllers
 
         public async Task<IActionResult> InsertChoice(ChoiceDTO choice)
         {
-
             var result = await choiceRepository.Create(choice);
             return Ok(result);
         }
@@ -39,11 +38,8 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> UpdateChoice(ChoiceDTO choice, int id)
         {
             var result = await choiceRepository.Update(choice, id);
-            if (result == false)
-            {
-                return BadRequest("Update failed");
-            }
-            return Ok();
+            return result ? Ok() : BadRequest("Update failed");
+
         }
 
         [HttpDelete]

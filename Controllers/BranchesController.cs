@@ -25,21 +25,14 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var branches = await branchRepository.GetById(id);
-            if (!branches.Any())
-            {
-                return NotFound();
-            }
+            return !branches.Any() ? NotFound() : Ok(branches);
 
-            return Ok(branches);
         }
 
         [HttpPost]
         public async Task<IActionResult> InsertBranch(BranchDTO branch)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+
             var result = await branchRepository.Insert(branch.BranchName);
             return Ok(result);
         }
@@ -48,7 +41,8 @@ namespace ExamNest.Controllers
         {
             var result = await branchRepository.Update(id, branch.BranchName);
 
-            return Ok(result);
+            return result ? Ok() : BadRequest("Update failed");
+
         }
 
         [HttpDelete]
@@ -57,7 +51,7 @@ namespace ExamNest.Controllers
             try
             {
                 var result = await branchRepository.Delete(id);
-                return Ok(result);
+                return result ? Ok() : BadRequest();
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
