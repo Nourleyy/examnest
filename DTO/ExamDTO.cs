@@ -25,7 +25,7 @@ namespace ExamNest.DTO
 
             RuleFor(e => e.ExamDate)
             .NotEmpty().WithMessage("Exam Date is required.")
-            .GreaterThanOrEqualTo(DateTime.Today).WithMessage("Exam Date cannot be in the past.");
+            .GreaterThanOrEqualTo(DateTime.Now).WithMessage("Exam Date cannot be in the past.");
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using AutoMapper;
 using ExamNest.DTO;
 using ExamNest.Interfaces;
 using ExamNest.Models;
@@ -10,10 +12,11 @@ namespace ExamNest.Repositories
     {
         public Task<GetExamDetailsResult?> GetExamDetailsById(int id);
         public Task<IEnumerable<ExamDTO?>> GetExams();
-
         public Task<ExamDTO?> GetExamById(int id);
 
+        public Task<GetStudentExamResultsResult?> GetExamResultByStudentId(int studentId, int examId);
 
+        public Task<List<QuestionWithChoicesDTO>> GetExam(int id);
 
 
     }
@@ -41,7 +44,8 @@ namespace ExamNest.Repositories
                     ExamId = e.ExamId,
                     CourseId = e.CourseId,
                     CourseName = e.Course.CourseName,
-                    ExamDate = e.ExamDate
+                    ExamDate = e.ExamDate,
+                    NoOfQuestions = e.Questions.Count
                 }).ToListAsync();
             return exams;
         }
@@ -54,9 +58,27 @@ namespace ExamNest.Repositories
 
         public async Task<ExamDTO?> GetExamById(int id)
         {
-            var exam = await _appDBContext.Exams.FindAsync(id);
+            var exam = await _appDBContext.Exams
+                .Include(c => c.Course)
+                .Include(q => q.Questions)
+                .Select(e => new ExamDTO
+                {
+                    ExamId = e.ExamId,
+                    CourseId = e.CourseId,
+                    CourseName = e.Course.CourseName,
+                    ExamDate = e.ExamDate,
+                    NoOfQuestions = e.Questions.Count
+                })
+                .Where(e => e.ExamId == id)
+                .FirstOrDefaultAsync();
 
-            return mapper.Map<ExamDTO>(exam);
+            if (exam == null)
+            {
+                return null;
+            }
+
+
+                return mapper.Map<ExamDTO>(exam);
         }
 
         public Task<bool> Delete(int id)
@@ -75,12 +97,49 @@ namespace ExamNest.Repositories
 
             exam.ExamDate = entity.ExamDate;
 
-            _appDBContext.Entry(exam).State = EntityState.Modified;
             await _appDBContext.SaveChangesAsync();
 
             return exam;
 
 
+        }
+
+        public async Task<GetStudentExamResultsResult?> GetExamResultByStudentId(int studentId, int examId)
+        {
+            var result = await appDBContextProcedures.GetStudentExamResultsAsync(studentId, examId);
+
+            return result.FirstOrDefault();
+        }
+
+      public async Task<List<QuestionWithChoicesDTO>> GetExam(int id)
+        {
+
+            var questions = await appDBContextProcedures.GetExamQuestionListAsync(id);
+            if (questions == null || questions.Count == 0)
+            {
+                throw new Exception("Exam has No Questions");
+            }
+            var choices = await appDBContextProcedures.GetExamChoiceListAsync(id);
+            if (choices == null || choices.Count == 0)
+            {
+                throw new Exception("No Choices for this Exam");
+            }
+            var exam =  questions.Select(q => new QuestionWithChoicesDTO
+             {
+                 QuestionId = q.QuestionID,
+                 QuestionText = q.QuestionText,
+                 QuestionType = q.QuestionType,
+                 Points = q.Points,
+                 Choices = choices.Where(c => c.QuestionID == q.QuestionID).Select(c => new ChoiceDTO
+                 {
+                     QuestionId = c.QuestionID,
+                     ChoiceLetter = c.ChoiceLetter,
+                     ChoiceText = c.ChoiceText
+                 }).ToList()
+             }).ToList(); 
+            
+            
+            return exam;
         }
     }
 }
