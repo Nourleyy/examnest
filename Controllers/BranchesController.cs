@@ -25,15 +25,13 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var branches = await branchRepository.GetById(id);
-            return !branches.Any() ? NotFound() : Ok(branches);
+            return Ok(branches);
 
         }
 
         [HttpPost]
         public async Task<IActionResult> InsertBranch(BranchDTO branch)
         {
-
-
 
             var result = await branchRepository.Create(branch);
             return Ok(result);

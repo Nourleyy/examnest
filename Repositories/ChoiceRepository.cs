@@ -33,7 +33,7 @@ namespace ExamNest.Repositories
         public async Task<bool> Delete(int id)
         {
             var ListDeleted = await appDBContextProcedures.DeleteChoiceAsync(id);
-            return ListDeleted[0].RowsDeleted > 0;
+            return ListDeleted.Count > 0;
         }
 
     }

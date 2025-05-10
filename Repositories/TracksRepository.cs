@@ -1,4 +1,5 @@
 ﻿using ExamNest.DTO;
+using ExamNest.Interfaces;
 using ExamNest.Models;
 
 namespace ExamNest.Repositories
@@ -6,12 +7,20 @@ namespace ExamNest.Repositories
     class TracksRepository : GenericRepository, ITrackRepository
     {
 
-        public TracksRepository(AppDBContext appDB) : base(appDB)
+        private readonly IBranchRepository branchRepository;
+
+        public TracksRepository(AppDBContext appDB, IBranchRepository _branchRepository) : base(appDB)
         {
+            branchRepository = _branchRepository;
         }
 
         public async Task<TrackDTO?> Create(TrackDTO entity)
         {
+            var branchSearch = await branchRepository.GetById(entity.BranchId);
+            if (branchSearch == null)
+            {
+                return null;
+            }
             var Created = await appDBContextProcedures.CreateTrackAsync(entity.BranchId, entity.TrackName);
             return Created.Count > 0 ? entity : null;
         }
@@ -31,14 +40,19 @@ namespace ExamNest.Repositories
             return trackList;
         }
 
-        public async Task<GetTrackByIDResult> GetById(int id)
+        public async Task<GetTrackByIDResult?> GetById(int id)
         {
             var trackList = await appDBContextProcedures.GetTrackByIDAsync(id);
-            return trackList[0];
+            return trackList.FirstOrDefault();
         }
 
         public async Task<TrackDTO?> Update(int id, TrackDTO entity)
         {
+            var branchSearch = await branchRepository.GetById(entity.BranchId);
+            if (branchSearch == null)
+            {
+                return null;
+            }
             var Updated = await appDBContextProcedures.UpdateTrackAsync(id, entity.BranchId, entity.TrackName);
             return Updated.Count > 0 ? entity : null;
         }

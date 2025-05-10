@@ -1,6 +1,5 @@
 ﻿using ExamNest.DTO;
 using ExamNest.Interfaces;
-using ExamNest.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
@@ -10,12 +9,10 @@ namespace ExamNest.Controllers
     public class CoursesController : ControllerBase
     {
         private readonly ICoursesRepository coursesRepository;
-        private readonly ITrackRepository trackRepository;
 
-        public CoursesController(ICoursesRepository _courseRepository, ITrackRepository _trackRepository)
+        public CoursesController(ICoursesRepository _courseRepository)
         {
             coursesRepository = _courseRepository;
-            trackRepository = _trackRepository;
         }
 
         [HttpGet]
@@ -30,29 +27,19 @@ namespace ExamNest.Controllers
         {
             var tracks = await coursesRepository.GetById(id);
 
-            return tracks == null ? NotFound() : Ok(tracks);
+            return Ok(tracks);
         }
 
         [HttpPost]
         public async Task<IActionResult> InsertCourse(CourseDTO course)
         {
 
-            var trackSearch = await trackRepository.GetById(course.TrackId);
-            if (trackSearch == null)
-            {
-                return BadRequest("Track Id not found");
-            }
             var result = await coursesRepository.Create(course);
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateCourse(CourseDTO course, int id)
         {
-            var trackSearch = await trackRepository.GetById(course.TrackId);
-            if (trackSearch == null)
-            {
-                return BadRequest("Track Id not found");
-            }
             var result = await coursesRepository.Update(id, course);
             return Ok(result);
         }

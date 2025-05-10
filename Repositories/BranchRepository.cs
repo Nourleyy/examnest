@@ -15,9 +15,10 @@ namespace ExamNest.Repositories
         {
             return await appDBContextProcedures.GetAllBranchesAsync();
         }
-        public async Task<IEnumerable<GetBranchByIDResult>> GetById(int id)
+        public async Task<GetBranchByIDResult?> GetById(int id)
         {
-            return await appDBContextProcedures.GetBranchByIDAsync(id);
+            var branch = await appDBContextProcedures.GetBranchByIDAsync(id);
+            return branch.FirstOrDefault();
         }
 
         public async Task<bool> Delete(int id)
@@ -38,7 +39,6 @@ namespace ExamNest.Repositories
         public async Task<BranchDTO?> Update(int id, BranchDTO entity)
         {
             var Updated = await appDBContextProcedures.UpdateBranchAsync(id, entity.BranchName);
-
 
 
             return Updated.Count > 0 ? entity : null;

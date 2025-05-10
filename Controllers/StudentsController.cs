@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using ExamNest.DTO;
 using ExamNest.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

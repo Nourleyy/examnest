@@ -6,8 +6,11 @@ namespace ExamNest.Repositories
 {
     public class CoursesRepository : GenericRepository, ICoursesRepository
     {
-        public CoursesRepository(AppDBContext appDB) : base(appDB)
+        private readonly ITrackRepository trackRepository;
+
+        public CoursesRepository(AppDBContext appDB, ITrackRepository _trackRepository) : base(appDB)
         {
+            trackRepository = _trackRepository;
         }
 
         public async Task<List<GetAllCoursesResult>> GetAll()
@@ -26,13 +29,23 @@ namespace ExamNest.Repositories
 
         public async Task<CourseDTO?> Update(int id, CourseDTO course)
         {
+            var trackSearch = await trackRepository.GetById(course.TrackId);
+            if (trackSearch == null)
+            {
+                return null;
+            }
             var result = await appDBContextProcedures.UpdateCourseAsync(id, course.TrackId, course.CourseName);
 
-            return result[0].RowsUpdated > 0 ? course : null;
+            return result.Count > 0 ? course : null;
         }
 
         public async Task<CourseDTO?> Create(CourseDTO course)
         {
+            var trackSearch = await trackRepository.GetById(course.TrackId);
+            if (trackSearch == null)
+            {
+                return null;
+            }
             var result = await appDBContextProcedures.CreateCourseAsync(course.TrackId, course.CourseName);
             return result.Count > 0 ? course : null;
         }
@@ -40,7 +53,7 @@ namespace ExamNest.Repositories
         public async Task<bool> Delete(int id)
         {
             var result = await appDBContextProcedures.DeleteCourseAsync(id);
-            return result[0].RowsDeleted > 0;
+            return result.Count > 0;
         }
 
 

@@ -7,7 +7,7 @@ namespace ExamNest.Interfaces
     {
 
         Task<IEnumerable<GetAllBranchesResult>> GetAll();
-        Task<IEnumerable<GetBranchByIDResult>> GetById(int id);
+        Task<GetBranchByIDResult?> GetById(int id);
 
     }
 }

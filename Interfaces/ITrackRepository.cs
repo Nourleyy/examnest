@@ -9,7 +9,7 @@ namespace ExamNest.Repositories
     public interface ITrackRepository : IGeneric<TrackDTO>
     {
         Task<IEnumerable<GetAllTracksResult>> GetAll();
-        Task<GetTrackByIDResult> GetById(int id);
+        Task<GetTrackByIDResult?> GetById(int id);
     }
 
 

@@ -1,5 +1,4 @@
 ﻿using ExamNest.DTO;
-using ExamNest.Interfaces;
 using ExamNest.Models;
 using ExamNest.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +9,10 @@ namespace ExamNest.Controllers
     [ApiController]
     public class TracksController : ControllerBase
     {
-        private readonly IBranchRepository branchRepository;
         private readonly ITrackRepository trackRepository;
 
-        public TracksController(AppDBContext context, IBranchRepository _branchRepository, ITrackRepository _trackRepository)
+        public TracksController(AppDBContext context, ITrackRepository _trackRepository)
         {
-            branchRepository = _branchRepository;
             trackRepository = _trackRepository;
         }
 
@@ -37,23 +34,13 @@ namespace ExamNest.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertTrack(TrackDTO track)
         {
-
-            var branchSearch = await branchRepository.GetById(track.BranchId);
-            if (branchSearch == null)
-            {
-                return BadRequest("Branch Id not found");
-            }
             var result = await trackRepository.Create(track);
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateBranch(TrackDTO track, int id)
         {
-            var branchSearch = await branchRepository.GetById(track.BranchId);
-            if (branchSearch == null)
-            {
-                return BadRequest("Branch Id not found");
-            }
+
             var result = await trackRepository.Update(id, track);
 
             return Ok(result);
