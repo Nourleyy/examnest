@@ -28,11 +28,11 @@ namespace ExamNest.Repositories
         }
 
 
-        public async Task<BranchDTO?> Create(BranchDTO entity)
+        public async Task<BranchDTO?> Create(BranchDTO examDto)
         {
-            var result = await appDBContextProcedures.CreateBranchAsync(entity.BranchName);
+            var result = await appDBContextProcedures.CreateBranchAsync(examDto.BranchName);
 
-            return result.Count > 0 ? entity : null;
+            return result.Count > 0 ? examDto : null;
 
         }
 

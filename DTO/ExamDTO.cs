@@ -7,6 +7,7 @@ namespace ExamNest.DTO
         public int ExamId { get; set; }
         public int CourseId { get; set; }
         public string CourseName { get; set; }
+        public int NoOfQuestions { get; set; }
         public DateTime ExamDate { get; set; }
     }
 

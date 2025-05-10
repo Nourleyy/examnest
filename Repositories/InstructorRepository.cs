@@ -20,10 +20,10 @@ namespace ExamNest.Repositories
             mapper = _mapper;
         }
 
-        public async Task<UserDTO?> Create(UserDTO entity)
+        public async Task<UserDTO?> Create(UserDTO examDto)
         {
-            var trackSearch = await _trackRepository.GetById(entity.TrackId);
-            var branchSearch = await _branchRepository.GetById(entity.BranchId);
+            var trackSearch = await _trackRepository.GetById(examDto.TrackId);
+            var branchSearch = await _branchRepository.GetById(examDto.BranchId);
 
             if (trackSearch == null || branchSearch == null) return null;
 
@@ -32,8 +32,8 @@ namespace ExamNest.Repositories
             //{
             //    return BadRequest("User Id not found");
             //}
-            var result = await appDBContextProcedures.CreateInstructorAsync(entity.BranchId, entity.TrackId, entity.UserId);
-            return result.Count > 0 ? entity : null;
+            var result = await appDBContextProcedures.CreateInstructorAsync(examDto.BranchId, examDto.TrackId, examDto.UserId);
+            return result.Count > 0 ? examDto : null;
 
         }
 

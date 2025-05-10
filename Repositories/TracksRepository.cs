@@ -14,15 +14,15 @@ namespace ExamNest.Repositories
             branchRepository = _branchRepository;
         }
 
-        public async Task<TrackDTO?> Create(TrackDTO entity)
+        public async Task<TrackDTO?> Create(TrackDTO examDto)
         {
-            var branchSearch = await branchRepository.GetById(entity.BranchId);
+            var branchSearch = await branchRepository.GetById(examDto.BranchId);
             if (branchSearch == null)
             {
                 return null;
             }
-            var Created = await appDBContextProcedures.CreateTrackAsync(entity.BranchId, entity.TrackName);
-            return Created.Count > 0 ? entity : null;
+            var Created = await appDBContextProcedures.CreateTrackAsync(examDto.BranchId, examDto.TrackName);
+            return Created.Count > 0 ? examDto : null;
         }
 
         public async Task<bool> Delete(int id)

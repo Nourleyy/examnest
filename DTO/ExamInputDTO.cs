@@ -5,7 +5,6 @@ namespace ExamNest.DTO
     public class ExamInputDTO
     {
         public int CourseId { get; set; }
-
         public int NoOfQuestions { get; set; }
         public DateTime ExamDate { get; set; }
     }
