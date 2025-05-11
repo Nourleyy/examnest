@@ -11,9 +11,14 @@ namespace ExamNest.Repositories
         {
         }
 
-        public async Task<IEnumerable<GetAllBranchesResult>> GetAll()
+        public async Task<IEnumerable<GetAllBranchesResult>> GetAll(int page)
         {
-            return await appDBContextProcedures.GetAllBranchesAsync();
+            var pages = await appDBContextProcedures.GetAllBranchesAsync();
+
+            var paginatedResult = pages.Skip(CalculatePagination(page)).Take(LimitPerPage);
+
+            return paginatedResult;
+
         }
         public async Task<GetBranchByIDResult?> GetById(int id)
         {
