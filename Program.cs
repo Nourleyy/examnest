@@ -31,7 +31,7 @@ namespace ExamNest
             builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
             builder.Services.AddScoped<IExamRepository, ExamRepository>();
             builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
-            builder.Services.AddScoped<IQuestionRepository>();
+            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
             var app = builder.Build();
 

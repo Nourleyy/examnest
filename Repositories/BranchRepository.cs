@@ -7,13 +7,21 @@ namespace ExamNest.Repositories
 
     public class BranchRepository : GenericRepository, IBranchRepository
     {
+        private const int LimitPerPage = 10;
         public BranchRepository(AppDBContext appDB) : base(appDB)
         {
         }
 
-        public async Task<IEnumerable<GetAllBranchesResult>> GetAll()
+        public async Task<IEnumerable<GetAllBranchesResult>> GetAll(int skip = 0, int page = 1)
         {
-            return await appDBContextProcedures.GetAllBranchesAsync();
+            var pages = await appDBContextProcedures.GetAllBranchesAsync();
+
+            var pagination = (page - 1) * LimitPerPage;
+
+            var paginatedResult = pages.Skip(pagination).Take(LimitPerPage);
+
+            return paginatedResult;
+
         }
         public async Task<GetBranchByIDResult?> GetById(int id)
         {
