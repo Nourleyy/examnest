@@ -8,19 +8,18 @@ namespace ExamNest.DTO
         public int StudentID { get; set; }
         public List<ExamAnswerDTO>? Answers { get; set; }
     }
-    public class SubmissionDTOValidator : AbstractValidator<SubmissionDTO>
+    public class SubmissionInputDTOValidator : AbstractValidator<SubmissionInputDTO>
     {
-        public SubmissionDTOValidator()
+        public SubmissionInputDTOValidator()
         {
-            RuleFor(s => s.ExamId)
-                  .NotEmpty().WithMessage("Exam Id is required.")
-                  .GreaterThan(0).WithMessage("Exam Id must be greater than 0.");
-
-            RuleFor(s => s.StudentId)
-                  .NotEmpty().WithMessage("Student Id is required.")
-                  .GreaterThan(0).WithMessage("Student Id must be greater than 0.");
-
-
+            RuleFor(s => s.ExamID)
+                  .NotEmpty().WithMessage("Exam ID is required.")
+                  .GreaterThan(0).WithMessage("Exam ID must be greater than 0.");
+            RuleFor(s => s.StudentID)
+                  .NotEmpty().WithMessage("Student ID is required.")
+                  .GreaterThan(0).WithMessage("Student ID must be greater than 0.");
+         
         }
     }
+ 
 }

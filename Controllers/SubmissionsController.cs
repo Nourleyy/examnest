@@ -48,9 +48,11 @@ namespace ExamNest.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertSubmission(SubmissionInputDTO request)
         {
-           
-                var result = await submissionRepository.Create(request);
-                return Ok(result);
+
+            // TODO: After Identity We will extract the userId from the token
+
+            var result = await submissionRepository.Create(request);
+            return Ok(result);
           
         }
 
