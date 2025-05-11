@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ExamNest.DTO;
 using ExamNest.Models;
+using ExamNest.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,13 +11,15 @@ namespace ExamNest.Controllers
     [ApiController]
     public class QuestionBankController : ControllerBase
     {
-        private readonly AppDBContext _context;
-        private readonly IMapper _mapper;
 
-        public QuestionBankController(AppDBContext context, IMapper mapper)
+
+        private readonly IQuestionRepository questionRepository;
+    
+
+        public QuestionBankController(IQuestionRepository _questionRepository)
         {
-            _context = context;
-            _mapper = mapper;
+            questionRepository = _questionRepository;
+
         }
 
         [HttpGet]
