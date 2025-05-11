@@ -80,7 +80,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteExam(int id)
+        public async Task<IActionResult> DeleteExam([FromQuery] int id)
         {
             try
             {

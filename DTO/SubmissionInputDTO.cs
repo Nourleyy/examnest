@@ -20,6 +20,7 @@ namespace ExamNest.DTO
                   .NotEmpty().WithMessage("Student Id is required.")
                   .GreaterThan(0).WithMessage("Student Id must be greater than 0.");
 
+
         }
     }
 }
