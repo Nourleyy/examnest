@@ -1,6 +1,5 @@
 ﻿using ExamNest.DTO;
 using ExamNest.Interfaces;
-using ExamNest.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
@@ -11,7 +10,7 @@ namespace ExamNest.Controllers
     {
         private readonly IChoiceRepository choiceRepository;
 
-        public ChoicesController(AppDBContext context, IChoiceRepository _choiceRepository)
+        public ChoicesController(IChoiceRepository _choiceRepository)
         {
             choiceRepository = _choiceRepository;
         }
