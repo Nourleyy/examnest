@@ -11,7 +11,7 @@ namespace ExamNest.Controllers
 
         private readonly ISubmissionRepository submissionRepository;
 
-        public SubmissionsController( ISubmissionRepository _submissionRepository)
+        public SubmissionsController(ISubmissionRepository _submissionRepository)
         {
             submissionRepository = _submissionRepository;
         }
@@ -21,10 +21,7 @@ namespace ExamNest.Controllers
         {
 
             var submissions = await submissionRepository.GetAll();
-            if (submissions == null || submissions.Count == 0)
-            {
-                return Ok("No Submissions found");
-            }
+
             return Ok(submissions);
 
         }
@@ -33,16 +30,16 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var submission = await submissionRepository.GetById(id);
-        
+
             return Ok(submission);
         }
 
         [HttpGet("{id:int}/details")]
         public async Task<IActionResult> GetSubmissionDetails(int id)
         {
-                var details = await submissionRepository.GetSubmissionDetails(id);
-                return Ok(details);
-           
+            var details = await submissionRepository.GetSubmissionDetails(id);
+            return Ok(details);
+
         }
 
         [HttpPost]
@@ -53,7 +50,7 @@ namespace ExamNest.Controllers
 
             var result = await submissionRepository.Create(request);
             return Ok(result);
-          
+
         }
 
         [HttpDelete]

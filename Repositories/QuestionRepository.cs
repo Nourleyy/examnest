@@ -6,44 +6,90 @@ namespace ExamNest.Repositories
 {
     public interface IQuestionRepository : IGeneric<QuestionBankDTO>
     {
-        Task<List<QuestionBankDTO>> GetAll();
-        Task<List<QuestionBankDTO>> GetQuestionById(int id);
-        Task<List<ChoiceDTO>> GetChoicesByQuestionId(int id);
+        Task<List<GetAllQuestionsResult>> GetAll();
+        Task<List<GetQuestionByIDResult>> GetQuestionById(int id);
+        Task<List<QuestionWithChoicesDTO>> GetQuestionChoicesByQuestionId(int id);
     }
     public class QuestionRepository : GenericRepository, IQuestionRepository
     {
-        public QuestionRepository(AppDBContext appDB) : base(appDB)
+        private readonly ICoursesRepository coursesRepository;
+        public QuestionRepository(
+            AppDBContext appDB,
+            ICoursesRepository _coursesRepository) : base(appDB)
         {
+            coursesRepository = _coursesRepository;
         }
 
-        public Task<QuestionBankDTO?> Create(QuestionBankDTO examDto)
+        public async Task<QuestionBankDTO?> Create(QuestionBankDTO question)
         {
-            throw new NotImplementedException();
+            var courseSearch = await coursesRepository.GetById(question.CourseId);
+            if (courseSearch == null)
+            {
+                throw new Exception("Course not found");
+            }
+            var result = await appDBContextProcedures.CreateQuestionAsync(question.CourseId, question.QuestionText, question.QuestionType, question.ModelAnswer, question.Points);
+
+            return result.Count > 0 ? question : null;
         }
 
-        public Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new NotImplementedException();
+            var result = await appDBContextProcedures.DeleteQuestionAsync(id);
+            return result.Count > 0;
+
         }
 
-        public Task<List<QuestionBankDTO>> GetAll()
+        public async Task<List<GetAllQuestionsResult>> GetAll()
         {
-            throw new NotImplementedException();
+            var result = await appDBContextProcedures.GetAllQuestionsAsync();
+            return result;
+
         }
 
-        public Task<List<ChoiceDTO>> GetChoicesByQuestionId(int id)
+        public async Task<List<QuestionWithChoicesDTO>> GetQuestionChoicesByQuestionId(int id)
         {
-            throw new NotImplementedException();
+            var choices = await appDBContextProcedures.GetChoicesByQuestionAsync(id);
+
+            var question = await GetQuestionById(id);
+
+            var grouped = question.Select(q => new QuestionWithChoicesDTO
+            {
+                QuestionId = id,
+                QuestionText = q.QuestionText,
+                QuestionType = q.QuestionType,
+                Points = q.Points,
+                Choices = choices.Select(c => new ChoiceDTO
+                {
+                    QuestionId = c.QuestionID,
+                    ChoiceLetter = c.ChoiceLetter,
+                    ChoiceText = c.ChoiceText
+                }).ToList()
+            }).ToList();
+
+
+            return grouped;
         }
 
-        public Task<List<QuestionBankDTO>> GetQuestionById(int id)
+        public async Task<List<GetQuestionByIDResult>> GetQuestionById(int id)
         {
-            throw new NotImplementedException();
+            var result = await appDBContextProcedures.GetQuestionByIDAsync(id);
+            return result;
         }
 
-        public Task<QuestionBankDTO?> Update(int id, QuestionBankDTO entity)
+        public async Task<QuestionBankDTO?> Update(int id, QuestionBankDTO question)
         {
-            throw new NotImplementedException();
+
+            var courseSearch = await coursesRepository.GetById(question.CourseId);
+            if (courseSearch == null)
+            {
+                throw new Exception("Course not found");
+            }
+            var result = await appDBContextProcedures.UpdateQuestionAsync(id, question.CourseId, question.QuestionText, question.QuestionType, question.ModelAnswer, question.Points);
+
+
+
+
+            return result.Count == 0 ? null : question;
         }
     }
 }

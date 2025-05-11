@@ -1,5 +1,4 @@
 ﻿using ExamNest.DTO;
-using ExamNest.Models;
 using ExamNest.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +10,7 @@ namespace ExamNest.Controllers
     {
         public readonly IInstructorRepository InstructorRepository;
 
-        public InstructorsController(AppDBContext context, IInstructorRepository _instructorRepository)
+        public InstructorsController(IInstructorRepository _instructorRepository)
         {
             InstructorRepository = _instructorRepository;
         }
