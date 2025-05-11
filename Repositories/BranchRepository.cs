@@ -11,12 +11,11 @@ namespace ExamNest.Repositories
         {
         }
 
-        public async Task<IEnumerable<GetAllBranchesResult>> GetAll(int skip = 0, int page = 1)
+        public async Task<IEnumerable<GetAllBranchesResult>> GetAll(int page)
         {
             var pages = await appDBContextProcedures.GetAllBranchesAsync();
 
-
-            var paginatedResult = pages.Skip(CalculatePagination(skip, page)).Take(LimitPerPage);
+            var paginatedResult = pages.Skip(CalculatePagination(page)).Take(LimitPerPage);
 
             return paginatedResult;
 

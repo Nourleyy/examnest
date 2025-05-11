@@ -15,9 +15,9 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetBranches()
+        public async Task<IActionResult> GetBranches([FromQuery] int page = 1)
         {
-            var branches = await branchRepository.GetAll();
+            var branches = await branchRepository.GetAll(page);
             return Ok(branches);
         }
 

@@ -18,7 +18,7 @@ namespace ExamNest.Repositories
         }
 
 
-        protected int CalculatePagination(int skip = 0, int page = 1)
+        protected int CalculatePagination(int page)
         {
             return (page - 1) * LimitPerPage;
 
