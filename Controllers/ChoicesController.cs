@@ -1,7 +1,5 @@
-﻿using AutoMapper;
-using ExamNest.DTO;
-using ExamNest.Models;
-using Microsoft.AspNetCore.Http;
+﻿using ExamNest.DTO;
+using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
@@ -10,55 +8,34 @@ namespace ExamNest.Controllers
     [ApiController]
     public class ChoicesController : ControllerBase
     {
-        private readonly AppDBContext _context;
-        private readonly IMapper _mapper;
+        private readonly IChoiceRepository choiceRepository;
 
-        public ChoicesController(AppDBContext context, IMapper mapper)
+        public ChoicesController(IChoiceRepository _choiceRepository)
         {
-            _context = context;
-            _mapper = mapper;
+            choiceRepository = _choiceRepository;
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var choice = await _context.GetProcedures().GetChoiceByIDAsync(id);
-            if (choice.Count == 0)
-            {
-                return Ok();
-            }
+            var choice = await choiceRepository.GetById(id);
+
             return Ok(choice);
         }
 
         [HttpPost]
+
         public async Task<IActionResult> InsertChoice(ChoiceDTO choice)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var questionSearch = _context.QuestionBanks.FirstOrDefault(q => q.QuestionId == choice.QuestionId);
-            if (questionSearch == null)
-            {
-                return BadRequest("Question Id not found");
-            }
-            var result = await _context.GetProcedures().CreateChoiceAsync(choice.QuestionId, choice.ChoiceLetter, choice.ChoiceText);
+            var result = await choiceRepository.Create(choice);
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateChoice(ChoiceDTO choice, int id)
         {
-            var questionSearch = _context.QuestionBanks.FirstOrDefault(q => q.QuestionId == choice.QuestionId);
-            if (questionSearch == null)
-            {
-                return BadRequest("Question Id not found");
-            }
-            var result = await _context.GetProcedures().UpdateChoiceAsync(id, choice.ChoiceLetter, choice.ChoiceText);
-            if (result[0].RowsUpdated == 0)
-            {
-                return Ok();
-            }
+            var result = await choiceRepository.Update(id, choice);
             return Ok(result);
+
         }
 
         [HttpDelete]
@@ -66,7 +43,7 @@ namespace ExamNest.Controllers
         {
             try
             {
-                var result = await _context.GetProcedures().DeleteChoiceAsync(id);
+                var result = await choiceRepository.Delete(id);
                 return Ok(result);
             }
             catch (Exception ex) { return BadRequest(ex.Message); }

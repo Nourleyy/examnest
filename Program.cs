@@ -1,9 +1,7 @@
-
-using ExamNest.DTO;
 using ExamNest.Extensions;
+using ExamNest.Interfaces;
 using ExamNest.Models;
-using FluentValidation;
-using FluentValidation.AspNetCore;
+using ExamNest.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamNest
@@ -15,16 +13,25 @@ namespace ExamNest
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddValidation();
 
             builder.Services.AddControllers();
 
-            builder.Services.AddValidation();
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddDbContext<AppDBContext>(
-        options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            // TODO: Extension to builder to have the all repositories registered in single file
+            builder.Services.AddScoped<IBranchRepository, BranchRepository>();
+            builder.Services.AddScoped<IChoiceRepository, ChoiceRepository>();
+            builder.Services.AddScoped<ICoursesRepository, CoursesRepository>();
+            builder.Services.AddScoped<ITrackRepository, TracksRepository>();
+            builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
+            builder.Services.AddScoped<IExamRepository, ExamRepository>();
+            builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+            builder.Services.AddScoped<IQuestionRepository>();
 
             var app = builder.Build();
 

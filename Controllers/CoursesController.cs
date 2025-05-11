@@ -1,5 +1,5 @@
 ﻿using ExamNest.DTO;
-using ExamNest.Models;
+using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
@@ -8,28 +8,24 @@ namespace ExamNest.Controllers
     [ApiController]
     public class CoursesController : ControllerBase
     {
-        private readonly AppDBContext _context;
+        private readonly ICoursesRepository coursesRepository;
 
-        public CoursesController(AppDBContext context)
+        public CoursesController(ICoursesRepository _courseRepository)
         {
-            _context = context;
+            coursesRepository = _courseRepository;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTracks()
+        public async Task<IActionResult> GetAll()
         {
-            var courses = await _context.GetProcedures().GetAllCoursesAsync();
+            var courses = await coursesRepository.GetAll();
             return Ok(courses);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var tracks = await _context.GetProcedures().GetCourseByIDAsync(id);
-            if (tracks.Count == 0)
-            {
-                return NotFound();
-            }
+            var tracks = await coursesRepository.GetById(id);
 
             return Ok(tracks);
         }
@@ -37,31 +33,14 @@ namespace ExamNest.Controllers
         [HttpPost]
         public async Task<IActionResult> InsertCourse(CourseDTO course)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var trackSearch = _context.Tracks.FirstOrDefault(t => t.TrackId == course.TrackId);
-            if (trackSearch == null)
-            {
-                return BadRequest("Track Id not found");
-            }
-            var result = await _context.GetProcedures().CreateCourseAsync(course.TrackId, course.CourseName);
+
+            var result = await coursesRepository.Create(course);
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateCourse(CourseDTO course, int id)
         {
-            var trackSearch = _context.Tracks.FirstOrDefault(c => c.TrackId == course.TrackId);
-            if (trackSearch == null)
-            {
-                return BadRequest("Track Id not found");
-            }
-            var result = await _context.GetProcedures().UpdateCourseAsync(id, course.TrackId, course.CourseName);
-            if (result[0].RowsUpdated == 0)
-            {
-                return NotFound();
-            }
+            var result = await coursesRepository.Update(id, course);
             return Ok(result);
         }
 
@@ -70,8 +49,8 @@ namespace ExamNest.Controllers
         {
             try
             {
-                var result = await _context.GetProcedures().DeleteCourseAsync(id);
-                return Ok(result);
+                var result = await coursesRepository.Delete(id);
+                return result ? Ok() : BadRequest("Course not deleted");
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }

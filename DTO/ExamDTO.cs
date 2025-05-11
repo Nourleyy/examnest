@@ -7,6 +7,7 @@ namespace ExamNest.DTO
         public int ExamId { get; set; }
         public int CourseId { get; set; }
         public string CourseName { get; set; }
+        public int NoOfQuestions { get; set; }
         public DateTime ExamDate { get; set; }
     }
 
@@ -24,7 +25,7 @@ namespace ExamNest.DTO
 
             RuleFor(e => e.ExamDate)
             .NotEmpty().WithMessage("Exam Date is required.")
-            .GreaterThanOrEqualTo(DateTime.Today).WithMessage("Exam Date cannot be in the past.");
+            .GreaterThanOrEqualTo(DateTime.Now).WithMessage("Exam Date cannot be in the past.");
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-
-namespace ExamNest.DTO
+﻿namespace ExamNest.DTO
 {
     public class UserViewDTO
     {
@@ -10,7 +8,7 @@ namespace ExamNest.DTO
         public string Name { get; set; }
         public string Email { get; set; }
         public string BranchName { get; set; }
-        public string TrackName {  get; set; }
+        public string TrackName { get; set; }
 
     }
 }

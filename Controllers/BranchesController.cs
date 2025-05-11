@@ -1,9 +1,6 @@
-﻿using AutoMapper;
-using ExamNest.DTO;
-using ExamNest.Models;
-using Microsoft.AspNetCore.Http;
+﻿using ExamNest.DTO;
+using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace ExamNest.Controllers
 {
@@ -11,53 +8,41 @@ namespace ExamNest.Controllers
     [ApiController]
     public class BranchesController : ControllerBase
     {
-        private readonly AppDBContext _context;
-        private readonly IMapper _mapper;
-
-        public BranchesController(AppDBContext context, IMapper mapper) 
+        private readonly IBranchRepository branchRepository;
+        public BranchesController(IBranchRepository _branch)
         {
-            _context = context;
-            _mapper = mapper;
+            branchRepository = _branch;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetBranches()
         {
-            var branches = await _context.GetProcedures().GetAllBranchesAsync();
+            var branches = await branchRepository.GetAll();
             return Ok(branches);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var branches = await _context.GetProcedures().GetBranchByIDAsync(id);
-            if(branches.Count == 0)
-            {
-                return NotFound();
-            }
-            
+            var branches = await branchRepository.GetById(id);
             return Ok(branches);
+
         }
 
         [HttpPost]
         public async Task<IActionResult> InsertBranch(BranchDTO branch)
         {
-            if(!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var result = await _context.GetProcedures().CreateBranchAsync(branch.BranchName);
+
+            var result = await branchRepository.Create(branch);
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateBranch(BranchDTO branch, int id)
         {
-            var result  = await _context.GetProcedures().UpdateBranchAsync(id,branch.BranchName);
-            if (result[0].RowsUpdated == 0)
-            {
-                return NotFound();
-            }
+            var result = await branchRepository.Update(id, branch);
+
             return Ok(result);
+
         }
 
         [HttpDelete]
@@ -65,11 +50,11 @@ namespace ExamNest.Controllers
         {
             try
             {
-                var result = await _context.GetProcedures().DeleteBranchAsync(id);
-                return Ok(result);
+                var result = await branchRepository.Delete(id);
+                return result ? Ok() : BadRequest();
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
-        
+
     }
 }
