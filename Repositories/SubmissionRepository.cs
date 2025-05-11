@@ -54,9 +54,20 @@ namespace ExamNest.Repositories
 
         }
 
-        public Task<SubmissionInputDTO?> Update(int id, SubmissionInputDTO entity)
+        public async Task<SubmissionInputDTO?> Update(int id, SubmissionInputDTO entity)
         {
-            throw new NotImplementedException();
+            // Find the Submission by ID
+            var submission = await GetById(id);
+            if (submission == null)
+            {
+                return null; 
+            }
+            submission.StudentAnswers = mapper.Map<List<StudentAnswer>>(entity.Answers);
+            _appDBContext.Entry(submission).State = EntityState.Modified;
+            await _appDBContext.SaveChangesAsync();
+
+            return entity;
+
         }
 
         public async Task<List<SubmissionDTO>> GetAll()
