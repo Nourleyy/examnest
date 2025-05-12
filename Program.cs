@@ -1,7 +1,10 @@
 using ExamNest.Extensions;
+using ExamNest.Filters;
 using ExamNest.Interfaces;
+using ExamNest.Middlewares;
 using ExamNest.Models;
 using ExamNest.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamNest
@@ -15,7 +18,7 @@ namespace ExamNest
             // Add services to the container.
             builder.Services.AddValidation();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options => options.Filters.Add<ApiResponseFilter>());
 
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -32,6 +35,25 @@ namespace ExamNest
             builder.Services.AddScoped<IExamRepository, ExamRepository>();
             builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+            builder.Services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errors = context.ModelState
+                                        .Where(x => x.Value?.Errors.Count > 0)
+                                        .SelectMany(x => x.Value!.Errors)
+                                        .Select(x => x.ErrorMessage)
+                                        .ToList();
+
+                    var errorResponse = new ErrorResponse
+                    {
+                        Message = "Validation Failed",
+                        Errors = errors
+                    };
+
+                    return new BadRequestObjectResult(errorResponse);
+                };
+            });
 
             var app = builder.Build();
 
@@ -41,6 +63,7 @@ namespace ExamNest
                 app.MapOpenApi();
                 app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
             }
+            app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
             app.UseHttpsRedirection();
 
