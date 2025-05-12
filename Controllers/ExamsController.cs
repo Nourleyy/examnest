@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ExamNest.DTO;
-using ExamNest.Repositories;
+using ExamNest.Errors;
+using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
@@ -22,9 +23,9 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetExamsAsync()
+        public async Task<IActionResult> GetExamsAsync([FromQuery] int page = 1)
         {
-            var exams = await examRepository.GetExams();
+            var exams = await examRepository.GetExams(page);
             return Ok(exams);
 
         }
@@ -41,9 +42,10 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> DisplayExam(int id)
         {
             var exam = await examRepository.GetExam(id);
+            if (exam == null) throw new ResourceNotFoundException("No Exam with this ID");
             return Ok(exam);
 
-            
+
         }
 
         [HttpGet("student-results")]
@@ -51,7 +53,7 @@ namespace ExamNest.Controllers
         {
 
             var results = await examRepository.GetExamResultByStudentId(studentId, examId.Value);
-          
+
             return Ok(results);
 
 
@@ -62,17 +64,17 @@ namespace ExamNest.Controllers
         {
 
 
-            var exam = mapper.Map<ExamDTO>(examPayloadDto);
-            var examId = await examRepository.Create(exam);
-            return Ok(examId);
+            var examPayload = mapper.Map<ExamDTO>(examPayloadDto);
+            var exam = await examRepository.Create(examPayload);
+            return Ok(exam);
 
         }
 
 
         [HttpPut]
-        public async Task<IActionResult> UpdateExam([FromQuery]ExamUpdatePayloadDTO examUpdatePayload)
+        public async Task<IActionResult> UpdateExam([FromQuery] ExamUpdatePayloadDTO examUpdatePayload)
         {
-          
+
 
             var examUpdate = mapper.Map<ExamDTO>(examUpdatePayload);
             var updatedExam = await examRepository.Update(examUpdatePayload.Id, examUpdate);
@@ -82,12 +84,14 @@ namespace ExamNest.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteExam([FromQuery] int id)
         {
-            try
+
+            var deleted = await examRepository.Delete(id);
+
+            if (deleted)
             {
-                // Delete exam procedure ?
-                return Ok();
+                return Ok("Exam Deleted Successfully");
             }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            return BadRequest("Exam can't be deleted");
         }
     }
 }

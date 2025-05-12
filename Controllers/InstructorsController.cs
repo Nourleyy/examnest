@@ -25,9 +25,14 @@ namespace ExamNest.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var instructors = await InstructorRepository.GetById(id);
+            var instructor = await InstructorRepository.GetById(id);
 
-            return Ok(instructors);
+            if (instructor == null)
+            {
+                return NotFound("No Instructor with this ID");
+            }
+
+            return Ok(instructor);
         }
 
         [HttpPost]
@@ -35,10 +40,7 @@ namespace ExamNest.Controllers
         {
 
             var Inserted = await InstructorRepository.Create(instructor);
-            if (Inserted == null)
-            {
-                return BadRequest("Track Id or Branch Id not found");
-            }
+
             return Ok(Inserted);
 
         }
@@ -46,10 +48,7 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> UpdateInstructor(UserDTO instructor, int id)
         {
             var updated = await InstructorRepository.Update(id, instructor);
-            if (updated == null)
-            {
-                return BadRequest("Track Id or Branch Id not found");
-            }
+
             return Ok(updated);
 
         }
@@ -59,7 +58,11 @@ namespace ExamNest.Controllers
         {
 
             var deleted = await InstructorRepository.Delete(id);
-            return Ok();
+            if (!deleted)
+            {
+                return BadRequest("Instructor Can't Be Deleted");
+            }
+            return Ok("Instructor Deleted Successfully");
 
 
         }

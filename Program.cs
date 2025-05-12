@@ -45,7 +45,7 @@ namespace ExamNest
                                         .Select(x => x.ErrorMessage)
                                         .ToList();
 
-                    var errorResponse = new ErrorResponse
+                    var errorResponse = new ApiResponse<object>()
                     {
                         Message = "Validation Failed",
                         Errors = errors
@@ -56,6 +56,7 @@ namespace ExamNest
             });
 
             var app = builder.Build();
+            app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -63,7 +64,6 @@ namespace ExamNest
                 app.MapOpenApi();
                 app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
             }
-            app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
             app.UseHttpsRedirection();
 

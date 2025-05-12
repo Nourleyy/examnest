@@ -54,14 +54,16 @@ namespace ExamNest.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteSubmission(int id)
+        public async Task<IActionResult> DeleteSubmissionAsync(int id)
         {
-            try
+
+            var result = await submissionRepository.Delete(id);
+            if (!result)
             {
-                // Delete submission procedure ?
-                return Ok();
+                return BadRequest("Submission Can't Be Deleted");
             }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            return Ok(result);
+
         }
     }
 }

@@ -19,6 +19,10 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var choice = await choiceRepository.GetById(id);
+            if (choice == null)
+            {
+                return NotFound("No Choice with the provided ID");
+            }
 
             return Ok(choice);
         }
@@ -28,12 +32,22 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> InsertChoice(ChoiceDTO choice)
         {
             var result = await choiceRepository.Create(choice);
+            if (result == null)
+            {
+                return BadRequest("Choice can't be created");
+            }
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateChoice(ChoiceDTO choice, int id)
         {
             var result = await choiceRepository.Update(id, choice);
+
+            if (result == null)
+            {
+                return BadRequest("Error while updating the choice");
+            }
+
             return Ok(result);
 
         }
@@ -41,12 +55,14 @@ namespace ExamNest.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteChoice(int id)
         {
-            try
+
+            var result = await choiceRepository.Delete(id);
+            if (!result)
             {
-                var result = await choiceRepository.Delete(id);
-                return Ok(result);
+                return BadRequest("Choice Can't Be Deleted");
             }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            return Ok("Choice Deleted Successfully ");
+
         }
     }
 }

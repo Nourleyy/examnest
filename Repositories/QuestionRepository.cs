@@ -1,4 +1,5 @@
 ﻿using ExamNest.DTO;
+using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
 
@@ -10,7 +11,8 @@ namespace ExamNest.Repositories
         private readonly ICoursesRepository coursesRepository;
         public QuestionRepository(
             AppDBContext appDB,
-            ICoursesRepository _coursesRepository) : base(appDB)
+            ICoursesRepository _coursesRepository
+            ) : base(appDB)
         {
             coursesRepository = _coursesRepository;
         }
@@ -20,7 +22,7 @@ namespace ExamNest.Repositories
             var courseSearch = await coursesRepository.GetById(question.CourseId);
             if (courseSearch == null)
             {
-                throw new Exception("Course not found");
+                throw new ResourceNotFoundException("Course not found");
             }
             var result = await appDBContextProcedures.CreateQuestionAsync(question.CourseId, question.QuestionText, question.QuestionType, question.ModelAnswer, question.Points);
 
@@ -29,8 +31,13 @@ namespace ExamNest.Repositories
 
         public async Task<bool> Delete(int id)
         {
+            var question = await GetQuestionById(id);
+            if (question == null)
+            {
+                throw new ResourceNotFoundException("Question not found to be deleted");
+            }
             var result = await appDBContextProcedures.DeleteQuestionAsync(id);
-            return result.Count > 0;
+            return result.FirstOrDefault().RowsDeleted > 0;
 
         }
 
@@ -42,34 +49,36 @@ namespace ExamNest.Repositories
 
         }
 
-        public async Task<List<QuestionWithChoicesDTO>> GetQuestionChoicesByQuestionId(int id)
+        public async Task<QuestionWithChoicesDTO> GetQuestionChoicesByQuestionId(int id)
         {
+            var question = await GetQuestionById(id);
+            if (question == null)
+                throw new ResourceNotFoundException("Question not found");
+
             var choices = await appDBContextProcedures.GetChoicesByQuestionAsync(id);
 
-            var question = await GetQuestionById(id);
 
-            var grouped = question.Select(q => new QuestionWithChoicesDTO
+            var result = new QuestionWithChoicesDTO
             {
-                QuestionId = id,
-                QuestionText = q.QuestionText,
-                QuestionType = q.QuestionType,
-                Points = q.Points,
+                QuestionId = question.QuestionID,
+                QuestionText = question.QuestionText,
+                QuestionType = question.QuestionType,
+                Points = question.Points,
                 Choices = choices.Select(c => new ChoiceDTO
                 {
                     QuestionId = c.QuestionID,
                     ChoiceLetter = c.ChoiceLetter,
                     ChoiceText = c.ChoiceText
                 }).ToList()
-            }).ToList();
+            };
 
-
-            return grouped;
+            return result;
         }
 
-        public async Task<List<GetQuestionByIDResult>> GetQuestionById(int id)
+        public async Task<GetQuestionByIDResult?> GetQuestionById(int id)
         {
             var result = await appDBContextProcedures.GetQuestionByIDAsync(id);
-            return result;
+            return result.FirstOrDefault();
         }
 
         public async Task<QuestionBankDTO?> Update(int id, QuestionBankDTO question)
@@ -78,7 +87,7 @@ namespace ExamNest.Repositories
             var courseSearch = await coursesRepository.GetById(question.CourseId);
             if (courseSearch == null)
             {
-                throw new Exception("Course not found");
+                throw new ResourceNotFoundException("Course not found");
             }
             var result = await appDBContextProcedures.UpdateQuestionAsync(id, question.CourseId, question.QuestionText, question.QuestionType, question.ModelAnswer, question.Points);
 

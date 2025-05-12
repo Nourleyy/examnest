@@ -1,41 +1,48 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using ExamNest.DTO;
+using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamNest.Repositories
 {
-    public interface IExamRepository : IGeneric<ExamDTO>
-    {
-        public Task<GetExamDetailsResult?> GetExamDetailsById(int id);
-        public Task<IEnumerable<ExamDTO?>> GetExams();
-        public Task<ExamDTO?> GetExamById(int id);
-
-        public Task<GetStudentExamResultsResult?> GetExamResultByStudentId(int studentId, int examId);
-
-        public Task<List<QuestionWithChoicesDTO>> GetExam(int id);
-
-
-    }
     public class ExamRepository : GenericRepository, IExamRepository
     {
         private readonly IMapper mapper;
-        public ExamRepository(AppDBContext appDB, IMapper _mapper) : base(appDB)
+        private readonly ICoursesRepository coursesRepository;
+        public ExamRepository(AppDBContext appDB, IMapper _mapper, ICoursesRepository coursesRepository) : base(appDB)
         {
             mapper = _mapper;
+            this.coursesRepository = coursesRepository;
         }
 
         public async Task<ExamDTO?> Create(ExamDTO examDto)
         {
+            var courseSearch = await coursesRepository.GetById(examDto.CourseId);
+            if (courseSearch == null)
+            {
+                throw new ResourceNotFoundException("Course not found");
+            }
             var exam = await appDBContextProcedures.CreateExamAndGetIdAsync(examDto.CourseId, examDto.NoOfQuestions, examDto.ExamDate);
-            return exam.Count > 0 ? mapper.Map<ExamDTO>(exam) : null;
+
+            if (exam.FirstOrDefault() == null)
+            {
+                throw new InvalidOperationException("Exam not created");
+            }
+
+            return exam.Count > 0 ? new ExamDTO()
+            {
+                ExamId = exam.FirstOrDefault().ExamID.Value,
+                CourseId = courseSearch.CourseID,
+                CourseName = courseSearch.CourseName,
+                ExamDate = examDto.ExamDate,
+                NoOfQuestions = examDto.NoOfQuestions
+            } : null;
 
         }
 
-        public async Task<IEnumerable<ExamDTO?>> GetExams()
+        public async Task<IEnumerable<ExamDTO?>> GetExams(int page)
         {
             var exams = await _appDBContext.Exams
                 .Include(c => c.Course)
@@ -46,13 +53,17 @@ namespace ExamNest.Repositories
                     CourseName = e.Course.CourseName,
                     ExamDate = e.ExamDate,
                     NoOfQuestions = e.Questions.Count
-                }).ToListAsync();
+                })
+                .Skip(CalculatePagination(page))
+                .Take(LimitPerPage)
+                .ToListAsync();
             return exams;
         }
 
         public async Task<GetExamDetailsResult?> GetExamDetailsById(int id)
         {
             var exam = await appDBContextProcedures.GetExamDetailsAsync(id);
+
             return exam.FirstOrDefault();
         }
 
@@ -72,18 +83,22 @@ namespace ExamNest.Repositories
                 .Where(e => e.ExamId == id)
                 .FirstOrDefaultAsync();
 
-            if (exam == null)
-            {
-                return null;
-            }
 
 
-                return mapper.Map<ExamDTO>(exam);
+
+            return mapper.Map<ExamDTO>(exam);
         }
 
-        public Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new NotImplementedException();
+            var exam = await _appDBContext.Exams.FindAsync(id);
+            if (exam == null)
+            {
+                throw new ResourceNotFoundException("Exam not found to be deleted");
+            }
+            _appDBContext.Exams.Remove(exam);
+            await _appDBContext.SaveChangesAsync();
+            return true;
         }
 
         public async Task<ExamDTO?> Update(int id, ExamDTO entity)
@@ -92,7 +107,7 @@ namespace ExamNest.Repositories
 
             if (exam == null)
             {
-                return null;
+                throw new ResourceNotFoundException("Exam not found to be updated");
             }
 
             exam.ExamDate = entity.ExamDate;
@@ -106,39 +121,54 @@ namespace ExamNest.Repositories
 
         public async Task<GetStudentExamResultsResult?> GetExamResultByStudentId(int studentId, int examId)
         {
+            //TODO: Add Student Check 
+
+            var exam = await GetExamById(examId);
+            if (exam == null)
+            {
+                throw new ResourceNotFoundException("Exam not found");
+            }
             var result = await appDBContextProcedures.GetStudentExamResultsAsync(studentId, examId);
+
 
             return result.FirstOrDefault();
         }
 
-      public async Task<List<QuestionWithChoicesDTO>> GetExam(int id)
+        public async Task<List<QuestionWithChoicesDTO>> GetExam(int id)
         {
+
+            var isExamExist = await GetExamById(id);
+
+            if (isExamExist == null)
+            {
+                throw new ResourceNotFoundException("No Exam with this ID");
+            }
 
             var questions = await appDBContextProcedures.GetExamQuestionListAsync(id);
             if (questions == null || questions.Count == 0)
             {
-                throw new Exception("Exam has No Questions");
+                throw new ResourceNotFoundException("Exam has No Questions");
             }
             var choices = await appDBContextProcedures.GetExamChoiceListAsync(id);
             if (choices == null || choices.Count == 0)
             {
-                throw new Exception("No Choices for this Exam");
+                throw new ResourceNotFoundException("No Choices for this Exam");
             }
-            var exam =  questions.Select(q => new QuestionWithChoicesDTO
-             {
-                 QuestionId = q.QuestionID,
-                 QuestionText = q.QuestionText,
-                 QuestionType = q.QuestionType,
-                 Points = q.Points,
-                 Choices = choices.Where(c => c.QuestionID == q.QuestionID).Select(c => new ChoiceDTO
-                 {
-                     QuestionId = c.QuestionID,
-                     ChoiceLetter = c.ChoiceLetter,
-                     ChoiceText = c.ChoiceText
-                 }).ToList()
-             }).ToList(); 
-            
-            
+            var exam = questions.Select(q => new QuestionWithChoicesDTO
+            {
+                QuestionId = q.QuestionID,
+                QuestionText = q.QuestionText,
+                QuestionType = q.QuestionType,
+                Points = q.Points,
+                Choices = choices.Where(c => c.QuestionID == q.QuestionID).Select(c => new ChoiceDTO
+                {
+                    QuestionId = c.QuestionID,
+                    ChoiceLetter = c.ChoiceLetter,
+                    ChoiceText = c.ChoiceText
+                }).ToList()
+            }).ToList();
+
+
             return exam;
         }
     }

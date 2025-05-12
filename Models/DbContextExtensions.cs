@@ -16,23 +16,26 @@ namespace ExamNest.Models
         public static async Task<List<T>> SqlQueryAsync<T>(this DbContext db, string sql, object[] parameters = null, CancellationToken cancellationToken = default)
            where T : class
         {
-            if (parameters is null)
-            {
-                parameters = new object[] { };
-            }
+          
+                if (parameters is null)
+                {
+                    parameters = new object[] { };
+                }
 
-            if (typeof(T).GetProperties().Any())
-            {
-                return await db.Database
-                    .SqlQueryRaw<T>(sql, parameters)
-                    .ToListAsync(cancellationToken);
+                if (typeof(T).GetProperties().Any())
+                {
+                    return await db.Database
+                                   .SqlQueryRaw<T>(sql, parameters)
+                                   .ToListAsync(cancellationToken);
+                }
+                else
+                {
+                    await db.Database.ExecuteSqlRawAsync(sql, parameters, cancellationToken);
+                    return default;
+                }
             }
-            else
-            {
-                await db.Database.ExecuteSqlRawAsync(sql, parameters, cancellationToken);
-                return default;
-            }
-        }
+           
+        
     }
 
     public class OutputParameter<TValue>
