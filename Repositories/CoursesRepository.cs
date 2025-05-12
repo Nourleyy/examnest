@@ -1,4 +1,5 @@
 ﻿using ExamNest.DTO;
+using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
 
@@ -34,11 +35,20 @@ namespace ExamNest.Repositories
             var trackSearch = await trackRepository.GetById(course.TrackId);
             if (trackSearch == null)
             {
-                return null;
+                throw new ResourceNotFoundException("Provided track ID is not found");
             }
+
+            var courseById = await GetById(id);
+            if (courseById == null)
+            {
+                throw new ResourceNotFoundException("Provided Course ID is not found");
+            }
+
+
+
             var result = await appDBContextProcedures.UpdateCourseAsync(id, course.TrackId, course.CourseName);
 
-            return result.Count > 0 ? course : null;
+            return result.FirstOrDefault()?.RowsUpdated > 0 ? course : null;
         }
 
         public async Task<CourseDTO?> Create(CourseDTO course)
@@ -46,7 +56,7 @@ namespace ExamNest.Repositories
             var trackSearch = await trackRepository.GetById(course.TrackId);
             if (trackSearch == null)
             {
-                return null;
+                throw new ResourceNotFoundException("Provided track ID is not found");
             }
             var result = await appDBContextProcedures.CreateCourseAsync(course.TrackId, course.CourseName);
             return result.Count > 0 ? course : null;
@@ -54,8 +64,15 @@ namespace ExamNest.Repositories
 
         public async Task<bool> Delete(int id)
         {
+            var course = await GetById(id);
+            if (course == null)
+            {
+                throw new ResourceNotFoundException("Course not found to be deleted");
+            }
             var result = await appDBContextProcedures.DeleteCourseAsync(id);
-            return result.Count > 0;
+            return result.FirstOrDefault()?.RowsDeleted > 0;
+
+
         }
 
 

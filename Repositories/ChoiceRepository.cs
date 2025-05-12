@@ -1,4 +1,5 @@
 ﻿using ExamNest.DTO;
+using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
 
@@ -6,10 +7,11 @@ namespace ExamNest.Repositories
 {
     public class ChoiceRepository : GenericRepository, IChoiceRepository
     {
+        private readonly IQuestionRepository questionRepository;
 
-
-        public ChoiceRepository(AppDBContext appDB) : base(appDB)
+        public ChoiceRepository(AppDBContext appDB, IQuestionRepository questionRepository) : base(appDB)
         {
+            this.questionRepository = questionRepository;
         }
         public async Task<GetChoiceByIDResult?> GetById(int id)
         {
@@ -19,21 +21,45 @@ namespace ExamNest.Repositories
         }
         public async Task<ChoiceDTO?> Create(ChoiceDTO choice)
         {
-            var ListCreated = await appDBContextProcedures.CreateChoiceAsync(choice.QuestionId, choice.ChoiceLetter, choice.ChoiceText);
+            var question = await questionRepository.GetQuestionById(choice.QuestionId);
+            if (question == null)
+            {
+                throw new ResourceNotFoundException("Question not found to create a choice for it!");
+            }
+            var created = await appDBContextProcedures.CreateChoiceAsync(choice.QuestionId, choice.ChoiceLetter, choice.ChoiceText);
 
-            return ListCreated.Count > 0 ? choice : null;
+            return created.FirstOrDefault() != null ? choice : null;
         }
 
         public async Task<ChoiceDTO?> Update(int id, ChoiceDTO choice)
         {
-            var ListUpdated = await appDBContextProcedures.UpdateChoiceAsync(id, choice.ChoiceLetter, choice.ChoiceText);
-            return ListUpdated.Count > 0 ? choice : null;
+            var question = await questionRepository.GetQuestionById(choice.QuestionId);
+
+            if (question == null)
+            {
+                throw new ResourceNotFoundException("Question not found to update a choice for it!");
+            }
+
+            var isChoiceExists = await GetById(id);
+            if (isChoiceExists == null)
+            {
+                throw new ResourceNotFoundException("No Choice Found to be Updated!");
+
+            }
+            var updated = await appDBContextProcedures.UpdateChoiceAsync(id, choice.ChoiceLetter, choice.ChoiceText);
+            return updated.FirstOrDefault()?.RowsUpdated > 0 ? choice : null;
         }
 
         public async Task<bool> Delete(int id)
         {
-            var ListDeleted = await appDBContextProcedures.DeleteChoiceAsync(id);
-            return ListDeleted.Count > 0;
+            var choice = await GetById(id);
+            if (choice == null)
+            {
+                throw new ResourceNotFoundException("Choice not found to be deleted");
+            }
+            var deleted = await appDBContextProcedures.DeleteChoiceAsync(id);
+
+            return deleted.FirstOrDefault()?.RowsDeleted > 0;
         }
 
     }

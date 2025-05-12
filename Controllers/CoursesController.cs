@@ -25,9 +25,9 @@ namespace ExamNest.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var tracks = await coursesRepository.GetById(id);
+            var course = await coursesRepository.GetById(id);
 
-            return Ok(tracks);
+            return Ok(course);
         }
 
         [HttpPost]
@@ -47,12 +47,14 @@ namespace ExamNest.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteCourse(int id)
         {
-            try
+
+            var result = await coursesRepository.Delete(id);
+            if (!result)
             {
-                var result = await coursesRepository.Delete(id);
-                return result ? Ok() : BadRequest("Course not deleted");
+                return BadRequest("Course Can't Be Deleted");
             }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            return Ok(result);
+
         }
     }
 }

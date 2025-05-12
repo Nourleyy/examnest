@@ -18,14 +18,21 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> GetBranches([FromQuery] int page = 1)
         {
             var branches = await branchRepository.GetAll(page);
+
             return Ok(branches);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var branches = await branchRepository.GetById(id);
-            return Ok(branches);
+            var branch = await branchRepository.GetById(id);
+
+            if (branch == null)
+            {
+                return NotFound("No Branch Found with this ID");
+            }
+
+            return Ok(branch);
 
         }
 
@@ -34,12 +41,23 @@ namespace ExamNest.Controllers
         {
 
             var result = await branchRepository.Create(branch);
+            if (result == null)
+            {
+                return BadRequest("Branch not created");
+            }
             return Ok(result);
         }
         [HttpPut]
         public async Task<IActionResult> UpdateBranch(BranchDTO branch, int id)
         {
             var result = await branchRepository.Update(id, branch);
+
+            if (result == null)
+            {
+                return BadRequest("Error while updating the branch");
+            }
+
+
 
             return Ok(result);
 
@@ -48,13 +66,18 @@ namespace ExamNest.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteBranch(int id)
         {
-            try
+
+            var isDeleted = await branchRepository.Delete(id);
+
+            if (isDeleted)
             {
-                var result = await branchRepository.Delete(id);
-                return result ? Ok() : BadRequest();
+                return Ok("Branch Deleted Successfully");
             }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            return BadRequest("Branch couldn't be deleted");
+
+
         }
+
 
     }
 }

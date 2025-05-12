@@ -1,4 +1,5 @@
 ﻿using ExamNest.DTO;
+using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
 
@@ -19,7 +20,7 @@ namespace ExamNest.Repositories
             var branchSearch = await branchRepository.GetById(examDto.BranchId);
             if (branchSearch == null)
             {
-                return null;
+                throw new ResourceNotFoundException("Branch not found");
             }
             var Created = await appDBContextProcedures.CreateTrackAsync(examDto.BranchId, examDto.TrackName);
             return Created.Count > 0 ? examDto : null;
@@ -27,9 +28,13 @@ namespace ExamNest.Repositories
 
         public async Task<bool> Delete(int id)
         {
-
+            var track = await GetById(id);
+            if (track == null)
+            {
+                throw new ResourceNotFoundException("Track not found to be deleted");
+            }
             var Deleted = await appDBContextProcedures.DeleteTrackAsync(id);
-            return Deleted.Count > 0;
+            return Deleted.FirstOrDefault().RowsDeleted > 0;
 
 
         }
@@ -52,10 +57,10 @@ namespace ExamNest.Repositories
             var branchSearch = await branchRepository.GetById(entity.BranchId);
             if (branchSearch == null)
             {
-                return null;
+                throw new ResourceNotFoundException("Branch not found");
             }
-            var Updated = await appDBContextProcedures.UpdateTrackAsync(id, entity.BranchId, entity.TrackName);
-            return Updated.Count > 0 ? entity : null;
+            var update = await appDBContextProcedures.UpdateTrackAsync(id, entity.BranchId, entity.TrackName);
+            return update.Count > 0 ? entity : null;
         }
 
 

@@ -1,4 +1,5 @@
 ﻿using ExamNest.DTO;
+using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
 
@@ -22,31 +23,55 @@ namespace ExamNest.Repositories
         }
         public async Task<GetBranchByIDResult?> GetById(int id)
         {
-            var branch = await appDBContextProcedures.GetBranchByIDAsync(id);
-            return branch.FirstOrDefault();
+            var branchList = await appDBContextProcedures.GetBranchByIDAsync(id);
+
+            return branchList.FirstOrDefault();
+
         }
+
 
         public async Task<bool> Delete(int id)
         {
-            var Deleted = await appDBContextProcedures.DeleteBranchAsync(id);
-            return Deleted[0].RowsDeleted > 0;
+            var branch = await GetById(id);
+
+            if (branch == null)
+            {
+                throw new ResourceNotFoundException("Branch not found to be deleted");
+            }
+
+            var resultList = await appDBContextProcedures.DeleteBranchAsync(id);
+
+
+            return resultList.FirstOrDefault()?.RowsDeleted > 0;
         }
 
 
-        public async Task<BranchDTO?> Create(BranchDTO examDto)
-        {
-            var result = await appDBContextProcedures.CreateBranchAsync(examDto.BranchName);
 
-            return result.Count > 0 ? examDto : null;
+        public async Task<BranchDTO?> Create(BranchDTO branchDto)
+        {
+            var result = await appDBContextProcedures.CreateBranchAsync(branchDto.BranchName);
+
+
+
+            return result.FirstOrDefault() != null ? branchDto : null;
 
         }
 
-        public async Task<BranchDTO?> Update(int id, BranchDTO entity)
+        public async Task<BranchDTO?> Update(int id, BranchDTO branchDto)
         {
-            var Updated = await appDBContextProcedures.UpdateBranchAsync(id, entity.BranchName);
+            var branch = await GetById(id);
+
+            if (branch == null)
+            {
+                throw new ResourceNotFoundException("Branch not found to be updated");
+            }
+
+            var updated = await appDBContextProcedures.UpdateBranchAsync(id, branchDto.BranchName);
 
 
-            return Updated.Count > 0 ? entity : null;
+
+
+            return updated.FirstOrDefault()?.RowsUpdated > 0 ? branchDto : null;
         }
 
     }

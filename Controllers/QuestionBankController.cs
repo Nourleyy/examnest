@@ -30,9 +30,9 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var question = await questionRepository.GetQuestionById(id);
-            if (question.Count == 0)
+            if (question == null)
             {
-                return Ok();
+                return NotFound("No Question Found with this ID");
             }
 
             return Ok(question);
@@ -43,10 +43,7 @@ namespace ExamNest.Controllers
         {
 
             var question = await questionRepository.GetQuestionChoicesByQuestionId(id);
-            if (question.Count == 0)
-            {
-                return Ok();
-            }
+
             return Ok(question);
 
         }
@@ -72,8 +69,13 @@ namespace ExamNest.Controllers
         [HttpDelete]
         public async Task<IActionResult> DeleteQuestion(int id)
         {
-            await questionRepository.Delete(id);
-            return Ok();
+            var isDeleted = await questionRepository.Delete(id);
+            if (isDeleted)
+            {
+                return Ok("Question Deleted Successfully");
+            }
+
+            return BadRequest("Can't Delete this question");
         }
     }
 }

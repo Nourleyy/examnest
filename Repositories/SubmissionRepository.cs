@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ExamNest.DTO;
+using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
 using Microsoft.EntityFrameworkCore;
@@ -29,16 +30,21 @@ namespace ExamNest.Repositories
 
             if (entity == null)
             {
-                return false;
+                throw new ResourceNotFoundException("Submission Not Found To Be Deleted");
             }
             _appDBContext.ExamSubmissions.Remove(entity); // To be replaced with the soft delete method
-            _appDBContext.SaveChanges();
+            await _appDBContext.SaveChangesAsync();
             return true;
 
         }
 
         public async Task<List<GetStudentExamAnswerDetailsResult>> GetSubmissionDetails(int id)
         {
+            var submission = await GetById(id);
+            if (submission == null)
+            {
+                throw new ResourceNotFoundException("Submission Not Found");
+            }
             var SubmssionDetails = await appDBContextProcedures.GetStudentExamAnswerDetailsAsync(id);
 
             return SubmssionDetails;
@@ -60,7 +66,7 @@ namespace ExamNest.Repositories
             var submission = await GetById(id);
             if (submission == null)
             {
-                return null;
+                throw new ResourceNotFoundException("Submission Not Found To Be Updated");
             }
             submission.StudentAnswers = mapper.Map<List<StudentAnswer>>(entity.Answers);
             _appDBContext.Entry(submission).State = EntityState.Modified;
@@ -84,9 +90,14 @@ namespace ExamNest.Repositories
             return mapper.Map<List<SubmissionDTO>>(submissions);
         }
 
-        public Task<List<GetStudentExamChoiceDetailsResult>> GetStudentExamChoiceDetailsAsync(int id)
+        public async Task<List<GetStudentExamChoiceDetailsResult>> GetStudentExamChoiceDetailsAsync(int id)
         {
-            return appDBContextProcedures.GetStudentExamChoiceDetailsAsync(id);
+            var submission = await GetById(id);
+            if (submission == null)
+            {
+                throw new ResourceNotFoundException("Submission Not Found");
+            }
+            return await appDBContextProcedures.GetStudentExamChoiceDetailsAsync(id);
         }
     }
 }
