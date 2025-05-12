@@ -20,6 +20,10 @@ namespace ExamNest.Repositories
 
         protected int CalculatePagination(int page)
         {
+            if (page < 1)
+            {
+                page = 1;
+            }
             return (page - 1) * LimitPerPage;
 
         }

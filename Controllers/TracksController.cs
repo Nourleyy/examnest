@@ -17,9 +17,9 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTracks()
+        public async Task<IActionResult> GetTracks([FromQuery] int page = 1)
         {
-            var tracks = await trackRepository.GetAll();
+            var tracks = await trackRepository.GetAll(page);
             return Ok(tracks);
         }
 

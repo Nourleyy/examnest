@@ -13,9 +13,11 @@ namespace ExamNest.Repositories
             trackRepository = _trackRepository;
         }
 
-        public async Task<List<GetAllCoursesResult>> GetAll()
+        public async Task<IEnumerable<GetAllCoursesResult>> GetAll(int page)
         {
-            return await appDBContextProcedures.GetAllCoursesAsync();
+            var results = await appDBContextProcedures.GetAllCoursesAsync();
+            var paginatedResults = results.Skip(CalculatePagination(page)).Take(LimitPerPage);
+            return paginatedResults;
         }
 
         public async Task<GetCourseByIDResult?> GetById(int id)

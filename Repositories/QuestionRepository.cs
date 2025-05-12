@@ -4,12 +4,7 @@ using ExamNest.Models;
 
 namespace ExamNest.Repositories
 {
-    public interface IQuestionRepository : IGeneric<QuestionBankDTO>
-    {
-        Task<List<GetAllQuestionsResult>> GetAll();
-        Task<List<GetQuestionByIDResult>> GetQuestionById(int id);
-        Task<List<QuestionWithChoicesDTO>> GetQuestionChoicesByQuestionId(int id);
-    }
+
     public class QuestionRepository : GenericRepository, IQuestionRepository
     {
         private readonly ICoursesRepository coursesRepository;
@@ -39,10 +34,11 @@ namespace ExamNest.Repositories
 
         }
 
-        public async Task<List<GetAllQuestionsResult>> GetAll()
+        public async Task<IEnumerable<GetAllQuestionsResult>> GetAll(int page)
         {
             var result = await appDBContextProcedures.GetAllQuestionsAsync();
-            return result;
+            var paginatedResult = result.Skip(CalculatePagination(page)).Take(LimitPerPage);
+            return paginatedResult;
 
         }
 
