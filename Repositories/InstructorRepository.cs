@@ -39,12 +39,14 @@ namespace ExamNest.Repositories
 
 
 
-        public async Task<IEnumerable<UserViewDTO>> GetAll()
+        public async Task<IEnumerable<UserViewDTO>> GetAll(int page)
         {
             var instructors = await _appDBContext.Instructors
               .Include(t => t.Track)
               .Include(b => b.Branch)
               .Include(u => u.User)
+              .Skip(CalculatePagination(page))
+                .Take(LimitPerPage)
               .ToListAsync();
 
             return mapper.Map<IEnumerable<UserViewDTO>>(instructors);

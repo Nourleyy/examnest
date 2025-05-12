@@ -34,10 +34,11 @@ namespace ExamNest.Repositories
 
         }
 
-        public async Task<IEnumerable<GetAllTracksResult>> GetAll()
+        public async Task<IEnumerable<GetAllTracksResult>> GetAll(int page)
         {
             IEnumerable<GetAllTracksResult> trackList = await appDBContextProcedures.GetAllTracksAsync();
-            return trackList;
+            var paginatedResult = trackList.Skip(CalculatePagination(page)).Take(LimitPerPage);
+            return paginatedResult;
         }
 
         public async Task<GetTrackByIDResult?> GetById(int id)

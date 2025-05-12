@@ -16,9 +16,9 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetInstructorsAsync()
+        public async Task<IActionResult> GetInstructorsAsync([FromQuery] int page = 1)
         {
-            var instructors = await InstructorRepository.GetAll();
+            var instructors = await InstructorRepository.GetAll(page);
             return Ok(instructors);
         }
 

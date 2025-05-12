@@ -5,7 +5,7 @@ namespace ExamNest.Interfaces
 {
     public interface ICoursesRepository : IGeneric<CourseDTO>
     {
-        Task<List<GetAllCoursesResult>> GetAll();
+        Task<IEnumerable<GetAllCoursesResult>> GetAll(int page);
         Task<GetCourseByIDResult?> GetById(int id);
     }
 }

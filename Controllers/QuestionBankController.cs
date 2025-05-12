@@ -1,5 +1,5 @@
 ﻿using ExamNest.DTO;
-using ExamNest.Repositories;
+using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
@@ -20,9 +20,9 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetQuestionBank()
+        public async Task<IActionResult> GetQuestionBank([FromQuery] int page = 1)
         {
-            var Questions = await questionRepository.GetAll();
+            var Questions = await questionRepository.GetAll(page);
             return Ok(Questions);
         }
 
