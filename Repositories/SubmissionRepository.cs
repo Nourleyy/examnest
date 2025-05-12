@@ -20,12 +20,12 @@ namespace ExamNest.Repositories
         {
             var answersJson = JsonConvert.SerializeObject(submission.Answers);
             var result = await appDBContextProcedures.SubmitExamAnswersAsync(submission.ExamID, submission.StudentID, answersJson);
-             return submission;
+            return submission;
         }
 
         public async Task<bool> Delete(int id)
         {
-            var entity = await GetById( id);
+            var entity = await GetById(id);
 
             if (entity == null)
             {
@@ -39,8 +39,8 @@ namespace ExamNest.Repositories
 
         public async Task<List<GetStudentExamAnswerDetailsResult>> GetSubmissionDetails(int id)
         {
-            var SubmssionDetails =  await appDBContextProcedures.GetStudentExamAnswerDetailsAsync(id);
-         
+            var SubmssionDetails = await appDBContextProcedures.GetStudentExamAnswerDetailsAsync(id);
+
             return SubmssionDetails;
         }
 
@@ -49,8 +49,8 @@ namespace ExamNest.Repositories
 
             var submission = await _appDBContext.ExamSubmissions
                 .FirstOrDefaultAsync(x => x.SubmissionId == id);
-          
-            return submission ;
+
+            return submission;
 
         }
 
@@ -60,7 +60,7 @@ namespace ExamNest.Repositories
             var submission = await GetById(id);
             if (submission == null)
             {
-                return null; 
+                return null;
             }
             submission.StudentAnswers = mapper.Map<List<StudentAnswer>>(entity.Answers);
             _appDBContext.Entry(submission).State = EntityState.Modified;
@@ -70,16 +70,18 @@ namespace ExamNest.Repositories
 
         }
 
-        public async Task<List<SubmissionDTO>> GetAll()
+        public async Task<IEnumerable<SubmissionDTO>> GetAll(int page)
         {
             var submissions = await _appDBContext.ExamSubmissions
                .Include(s => s.Student)
                .ThenInclude(st => st.User)
                .Include(s => s.Exam)
                .ThenInclude(st => st.Course)
+               .Skip(CalculatePagination(page))
+               .Take(LimitPerPage)
                .ToListAsync();
-          
-                return mapper.Map<List<SubmissionDTO>>(submissions);
+
+            return mapper.Map<List<SubmissionDTO>>(submissions);
         }
 
         public Task<List<GetStudentExamChoiceDetailsResult>> GetStudentExamChoiceDetailsAsync(int id)

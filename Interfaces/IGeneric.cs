@@ -6,7 +6,7 @@
 
         Task<bool> Delete(int id);
         Task<U?> Update(int id, U entity);
-        Task<U?> Create(U examDto);
+        Task<U?> Create(U entityDto);
 
 
     }

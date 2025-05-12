@@ -17,10 +17,10 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetSubmissions()
+        public async Task<IActionResult> GetSubmissions([FromQuery] int page = 1)
         {
 
-            var submissions = await submissionRepository.GetAll();
+            var submissions = await submissionRepository.GetAll(page);
 
             return Ok(submissions);
 
