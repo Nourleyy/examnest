@@ -52,9 +52,9 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> InsertQuestion(QuestionBankDTO question)
         {
 
-            var Question = await questionRepository.Create(question);
+            var result = await questionRepository.Create(question);
 
-            return Ok(Question);
+            return RedirectToAction(nameof(GetById), new { id = result });
         }
         [HttpPut]
         public async Task<IActionResult> UpdateQuestion(QuestionBankDTO question, int id)
@@ -62,7 +62,7 @@ namespace ExamNest.Controllers
 
             var Question = await questionRepository.Update(id, question);
 
-            return Ok(Question);
+            return Ok(question);
 
         }
 

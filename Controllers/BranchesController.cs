@@ -46,7 +46,7 @@ namespace ExamNest.Controllers
                 return BadRequest("Branch not created");
             }
 
-            return RedirectToAction(nameof(GetById), new { id = 1 });
+            return RedirectToAction(nameof(GetById), new { id = result });
         }
         [HttpPut]
         public async Task<IActionResult> UpdateBranch(BranchDTO branch, int id)
@@ -60,7 +60,7 @@ namespace ExamNest.Controllers
 
 
 
-            return Ok(result);
+            return Ok(branch);
 
         }
 

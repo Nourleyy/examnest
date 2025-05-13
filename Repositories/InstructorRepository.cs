@@ -34,7 +34,7 @@ namespace ExamNest.Repositories
             //    return BadRequest("User Id not found");
             //}
             var result = await appDBContextProcedures.CreateInstructorAsync(userDto.BranchId, userDto.TrackId, userDto.UserId);
-            return result.FirstOrDefault().InstructorID;
+            return result.FirstOrDefault()?.InstructorID;
 
         }
 
@@ -78,7 +78,7 @@ namespace ExamNest.Repositories
             //}
 
             var result = await appDBContextProcedures.UpdateInstructorAsync(id, entity.BranchId, entity.TrackId, entity.UserId);
-            return result.FirstOrDefault().RowsUpdated > 0 ? id : null;
+            return result.FirstOrDefault()?.RowsUpdated > 0 ? id : null;
 
 
         }

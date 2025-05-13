@@ -35,13 +35,13 @@ namespace ExamNest.Controllers
         {
 
             var result = await coursesRepository.Create(course);
-            return Ok(result);
+            return RedirectToAction(nameof(GetById), new { id = result });
         }
         [HttpPut]
         public async Task<IActionResult> UpdateCourse(CourseDTO course, int id)
         {
             var result = await coursesRepository.Update(id, course);
-            return Ok(result);
+            return Ok(course);
         }
 
         [HttpDelete]

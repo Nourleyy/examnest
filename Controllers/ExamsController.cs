@@ -66,7 +66,7 @@ namespace ExamNest.Controllers
 
             var examPayload = mapper.Map<ExamDTO>(examPayloadDto);
             var exam = await examRepository.Create(examPayload);
-            return Ok(exam);
+            return RedirectToAction(nameof(GetById), new { id = exam });
 
         }
 
@@ -78,7 +78,7 @@ namespace ExamNest.Controllers
 
             var examUpdate = mapper.Map<ExamDTO>(examUpdatePayload);
             var updatedExam = await examRepository.Update(examUpdatePayload.Id, examUpdate);
-            return Ok(updatedExam);
+            return Ok(examUpdatePayload);
         }
 
         [HttpDelete]
