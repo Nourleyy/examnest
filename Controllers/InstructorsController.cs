@@ -39,9 +39,9 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> InsertInstructor(UserDTO instructor)
         {
 
-            var Inserted = await InstructorRepository.Create(instructor);
+            var result = await InstructorRepository.Create(instructor);
 
-            return Ok(Inserted);
+            return RedirectToAction(nameof(GetById), new { id = result });
 
         }
         [HttpPut]
@@ -49,7 +49,7 @@ namespace ExamNest.Controllers
         {
             var updated = await InstructorRepository.Update(id, instructor);
 
-            return Ok(updated);
+            return Ok(instructor);
 
         }
 

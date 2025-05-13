@@ -30,7 +30,7 @@ namespace ExamNest.Repositories
 
         }
 
-        public async Task<CourseDTO?> Update(int id, CourseDTO course)
+        public async Task<int?> Update(int id, CourseDTO course)
         {
             var trackSearch = await trackRepository.GetById(course.TrackId);
             if (trackSearch == null)
@@ -48,10 +48,10 @@ namespace ExamNest.Repositories
 
             var result = await appDBContextProcedures.UpdateCourseAsync(id, course.TrackId, course.CourseName);
 
-            return result.FirstOrDefault()?.RowsUpdated > 0 ? course : null;
+            return result.FirstOrDefault()?.RowsUpdated > 0 ? id : null;
         }
 
-        public async Task<CourseDTO?> Create(CourseDTO course)
+        public async Task<decimal?> Create(CourseDTO course)
         {
             var trackSearch = await trackRepository.GetById(course.TrackId);
             if (trackSearch == null)
@@ -59,7 +59,7 @@ namespace ExamNest.Repositories
                 throw new ResourceNotFoundException("Provided track ID is not found");
             }
             var result = await appDBContextProcedures.CreateCourseAsync(course.TrackId, course.CourseName);
-            return result.Count > 0 ? course : null;
+            return result.FirstOrDefault()?.CourseID;
         }
 
         public async Task<bool> Delete(int id)

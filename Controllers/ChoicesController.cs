@@ -36,7 +36,8 @@ namespace ExamNest.Controllers
             {
                 return BadRequest("Choice can't be created");
             }
-            return Ok(result);
+
+            return RedirectToAction(nameof(GetById), new { id = result });
         }
         [HttpPut]
         public async Task<IActionResult> UpdateChoice(ChoiceDTO choice, int id)
@@ -48,7 +49,7 @@ namespace ExamNest.Controllers
                 return BadRequest("Error while updating the choice");
             }
 
-            return Ok(result);
+            return Ok(choice);
 
         }
 

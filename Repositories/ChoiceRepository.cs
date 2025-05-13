@@ -19,7 +19,7 @@ namespace ExamNest.Repositories
 
             return ChoiceList.FirstOrDefault();
         }
-        public async Task<ChoiceDTO?> Create(ChoiceDTO choice)
+        public async Task<decimal?> Create(ChoiceDTO choice)
         {
             var question = await questionRepository.GetQuestionById(choice.QuestionId);
             if (question == null)
@@ -28,10 +28,10 @@ namespace ExamNest.Repositories
             }
             var created = await appDBContextProcedures.CreateChoiceAsync(choice.QuestionId, choice.ChoiceLetter, choice.ChoiceText);
 
-            return created.FirstOrDefault() != null ? choice : null;
+            return created.FirstOrDefault()?.ChoiceID;
         }
 
-        public async Task<ChoiceDTO?> Update(int id, ChoiceDTO choice)
+        public async Task<int?> Update(int id, ChoiceDTO choice)
         {
             var question = await questionRepository.GetQuestionById(choice.QuestionId);
 
@@ -47,7 +47,7 @@ namespace ExamNest.Repositories
 
             }
             var updated = await appDBContextProcedures.UpdateChoiceAsync(id, choice.ChoiceLetter, choice.ChoiceText);
-            return updated.FirstOrDefault()?.RowsUpdated > 0 ? choice : null;
+            return updated.FirstOrDefault()?.RowsUpdated > 0 ? id : null;
         }
 
         public async Task<bool> Delete(int id)

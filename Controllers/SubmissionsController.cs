@@ -31,6 +31,11 @@ namespace ExamNest.Controllers
         {
             var submission = await submissionRepository.GetById(id);
 
+            if (submission == null)
+            {
+                return NotFound("No Submission Found with this ID");
+            }
+
             return Ok(submission);
         }
 
@@ -49,7 +54,7 @@ namespace ExamNest.Controllers
             // TODO: After Identity We will extract the userId from the token
 
             var result = await submissionRepository.Create(request);
-            return Ok(result);
+            return RedirectToAction(nameof(GetById), new { id = result });
 
         }
 

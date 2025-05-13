@@ -17,7 +17,7 @@ namespace ExamNest.Repositories
             coursesRepository = _coursesRepository;
         }
 
-        public async Task<QuestionBankDTO?> Create(QuestionBankDTO question)
+        public async Task<decimal?> Create(QuestionBankDTO question)
         {
             var courseSearch = await coursesRepository.GetById(question.CourseId);
             if (courseSearch == null)
@@ -26,7 +26,7 @@ namespace ExamNest.Repositories
             }
             var result = await appDBContextProcedures.CreateQuestionAsync(question.CourseId, question.QuestionText, question.QuestionType, question.ModelAnswer, question.Points);
 
-            return result.Count > 0 ? question : null;
+            return result.FirstOrDefault()?.QuestionID;
         }
 
         public async Task<bool> Delete(int id)
@@ -81,7 +81,7 @@ namespace ExamNest.Repositories
             return result.FirstOrDefault();
         }
 
-        public async Task<QuestionBankDTO?> Update(int id, QuestionBankDTO question)
+        public async Task<int?> Update(int id, QuestionBankDTO question)
         {
 
             var courseSearch = await coursesRepository.GetById(question.CourseId);
@@ -94,7 +94,7 @@ namespace ExamNest.Repositories
 
 
 
-            return result.Count == 0 ? null : question;
+            return id;
         }
     }
 }
