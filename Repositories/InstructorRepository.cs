@@ -21,10 +21,10 @@ namespace ExamNest.Repositories
             mapper = _mapper;
         }
 
-        public async Task<UserDTO?> Create(UserDTO examDto)
+        public async Task<decimal?> Create(UserDTO userDto)
         {
-            var trackSearch = await _trackRepository.GetById(examDto.TrackId);
-            var branchSearch = await _branchRepository.GetById(examDto.BranchId);
+            var trackSearch = await _trackRepository.GetById(userDto.TrackId);
+            var branchSearch = await _branchRepository.GetById(userDto.BranchId);
 
             if (trackSearch == null || branchSearch == null) throw new ResourceNotFoundException("Either Track or Branch Not Found");
 
@@ -33,8 +33,8 @@ namespace ExamNest.Repositories
             //{
             //    return BadRequest("User Id not found");
             //}
-            var result = await appDBContextProcedures.CreateInstructorAsync(examDto.BranchId, examDto.TrackId, examDto.UserId);
-            return result.FirstOrDefault().InstructorID != null ? examDto : null;
+            var result = await appDBContextProcedures.CreateInstructorAsync(userDto.BranchId, userDto.TrackId, userDto.UserId);
+            return result.FirstOrDefault().InstructorID;
 
         }
 
@@ -61,7 +61,7 @@ namespace ExamNest.Repositories
             return instructor.FirstOrDefault();
         }
 
-        public async Task<UserDTO?> Update(int id, UserDTO entity)
+        public async Task<int?> Update(int id, UserDTO entity)
         {
             var instructor = await GetById(id);
             if (instructor == null ||
@@ -78,7 +78,7 @@ namespace ExamNest.Repositories
             //}
 
             var result = await appDBContextProcedures.UpdateInstructorAsync(id, entity.BranchId, entity.TrackId, entity.UserId);
-            return result.FirstOrDefault().RowsUpdated > 0 ? entity : null;
+            return result.FirstOrDefault().RowsUpdated > 0 ? id : null;
 
 
         }
@@ -91,7 +91,7 @@ namespace ExamNest.Repositories
             }
             var deleted = await appDBContextProcedures.DeleteInstructorAsync(id);
 
-            return deleted.FirstOrDefault().RowsDeleted > 0;
+            return deleted.FirstOrDefault()?.RowsDeleted > 0;
         }
     }
 

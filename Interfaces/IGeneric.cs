@@ -5,8 +5,8 @@
 
 
         Task<bool> Delete(int id);
-        Task<U?> Update(int id, U entity);
-        Task<U?> Create(U entityDto);
+        Task<int?> Update(int id, U entity);
+        Task<decimal?> Create(U entityDto);
 
 
     }

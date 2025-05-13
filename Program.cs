@@ -18,7 +18,7 @@ namespace ExamNest
             // Add services to the container.
             builder.Services.AddValidation();
 
-            builder.Services.AddControllers(options => options.Filters.Add<ApiResponseFilter>());
+            builder.Services.AddControllers();
 
 
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

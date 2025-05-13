@@ -17,11 +17,11 @@ namespace ExamNest.Repositories
             mapper = _mapper;
         }
 
-        public async Task<SubmissionInputDTO?> Create(SubmissionInputDTO submission)
+        public async Task<decimal?> Create(SubmissionInputDTO submission)
         {
             var answersJson = JsonConvert.SerializeObject(submission.Answers);
             var result = await appDBContextProcedures.SubmitExamAnswersAsync(submission.ExamID, submission.StudentID, answersJson);
-            return submission;
+            return result.FirstOrDefault()?.SubmissionID;
         }
 
         public async Task<bool> Delete(int id)
@@ -60,7 +60,7 @@ namespace ExamNest.Repositories
 
         }
 
-        public async Task<SubmissionInputDTO?> Update(int id, SubmissionInputDTO entity)
+        public async Task<int?> Update(int id, SubmissionInputDTO entity)
         {
             // Find the Submission by ID
             var submission = await GetById(id);
@@ -72,7 +72,7 @@ namespace ExamNest.Repositories
             _appDBContext.Entry(submission).State = EntityState.Modified;
             await _appDBContext.SaveChangesAsync();
 
-            return entity;
+            return id;
 
         }
 

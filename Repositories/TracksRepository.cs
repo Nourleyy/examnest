@@ -15,15 +15,15 @@ namespace ExamNest.Repositories
             branchRepository = _branchRepository;
         }
 
-        public async Task<TrackDTO?> Create(TrackDTO examDto)
+        public async Task<decimal?> Create(TrackDTO trackDto)
         {
-            var branchSearch = await branchRepository.GetById(examDto.BranchId);
+            var branchSearch = await branchRepository.GetById(trackDto.BranchId);
             if (branchSearch == null)
             {
                 throw new ResourceNotFoundException("Branch not found");
             }
-            var Created = await appDBContextProcedures.CreateTrackAsync(examDto.BranchId, examDto.TrackName);
-            return Created.Count > 0 ? examDto : null;
+            var Created = await appDBContextProcedures.CreateTrackAsync(trackDto.BranchId, trackDto.TrackName);
+            return Created.FirstOrDefault()?.TrackID;
         }
 
         public async Task<bool> Delete(int id)
@@ -52,7 +52,7 @@ namespace ExamNest.Repositories
             return trackList.FirstOrDefault();
         }
 
-        public async Task<TrackDTO?> Update(int id, TrackDTO entity)
+        public async Task<int?> Update(int id, TrackDTO entity)
         {
             var branchSearch = await branchRepository.GetById(entity.BranchId);
             if (branchSearch == null)
@@ -60,7 +60,7 @@ namespace ExamNest.Repositories
                 throw new ResourceNotFoundException("Branch not found");
             }
             var update = await appDBContextProcedures.UpdateTrackAsync(id, entity.BranchId, entity.TrackName);
-            return update.Count > 0 ? entity : null;
+            return id;
         }
 
 

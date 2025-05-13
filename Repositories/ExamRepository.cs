@@ -17,7 +17,7 @@ namespace ExamNest.Repositories
             this.coursesRepository = coursesRepository;
         }
 
-        public async Task<ExamDTO?> Create(ExamDTO examDto)
+        public async Task<decimal?> Create(ExamDTO examDto)
         {
             var courseSearch = await coursesRepository.GetById(examDto.CourseId);
             if (courseSearch == null)
@@ -31,14 +31,7 @@ namespace ExamNest.Repositories
                 throw new InvalidOperationException("Exam not created");
             }
 
-            return exam.Count > 0 ? new ExamDTO()
-            {
-                ExamId = exam.FirstOrDefault().ExamID.Value,
-                CourseId = courseSearch.CourseID,
-                CourseName = courseSearch.CourseName,
-                ExamDate = examDto.ExamDate,
-                NoOfQuestions = examDto.NoOfQuestions
-            } : null;
+            return exam.FirstOrDefault()?.ExamID;
 
         }
 
@@ -101,7 +94,7 @@ namespace ExamNest.Repositories
             return true;
         }
 
-        public async Task<ExamDTO?> Update(int id, ExamDTO entity)
+        public async Task<int?> Update(int id, ExamDTO entity)
         {
             var exam = await GetExamById(id);
 
@@ -114,7 +107,7 @@ namespace ExamNest.Repositories
 
             await _appDBContext.SaveChangesAsync();
 
-            return exam;
+            return id;
 
 
         }

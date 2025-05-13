@@ -47,17 +47,17 @@ namespace ExamNest.Repositories
 
 
 
-        public async Task<BranchDTO?> Create(BranchDTO branchDto)
+        public async Task<decimal?> Create(BranchDTO branchDto)
         {
             var result = await appDBContextProcedures.CreateBranchAsync(branchDto.BranchName);
 
 
 
-            return result.FirstOrDefault() != null ? branchDto : null;
+            return result.FirstOrDefault()?.BranchID;
 
         }
 
-        public async Task<BranchDTO?> Update(int id, BranchDTO branchDto)
+        public async Task<int?> Update(int id, BranchDTO branchDto)
         {
             var branch = await GetById(id);
 
@@ -71,7 +71,7 @@ namespace ExamNest.Repositories
 
 
 
-            return updated.FirstOrDefault()?.RowsUpdated > 0 ? branchDto : null;
+            return updated.FirstOrDefault()?.RowsUpdated > 0 ? id : null;
         }
 
     }
