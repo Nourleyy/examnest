@@ -21,7 +21,7 @@ namespace ExamNest.Models
         Task<List<CreateBranchResult>> CreateBranchAsync(string branchName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateChoiceResult>> CreateChoiceAsync(int? questionID, string choiceLetter, string choiceText, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateCourseResult>> CreateCourseAsync(int? trackID, string courseName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
-        Task<List<CreateExamAndGetIdResult>> CreateExamAndGetIdAsync(int? courseID, int? numberOfQuestions, DateTime? examDate, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
+        Task<List<CreateExamAndGetIdResult>> CreateExamAndGetIdAsync(int? courseID, int? numberOfQuestions, DateTime? examDate, DateTime? endDate, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateInstructorResult>> CreateInstructorAsync(int? branchID, int? trackID, int? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateQuestionResult>> CreateQuestionAsync(int? courseID, string questionText, string questionType, string modelAnswer, int? points, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateStudentResult>> CreateStudentAsync(int? branchID, int? trackID, int? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);

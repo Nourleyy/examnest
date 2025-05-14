@@ -1,10 +1,7 @@
 using ExamNest.Extensions;
 using ExamNest.Filters;
-using ExamNest.Interfaces;
 using ExamNest.Middlewares;
 using ExamNest.Models;
-using ExamNest.Repositories;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamNest
@@ -15,8 +12,6 @@ namespace ExamNest
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddValidation();
 
             builder.Services.AddControllers(options => options.Filters.Add<ApiResponseFilter>());
 
@@ -26,34 +21,10 @@ namespace ExamNest
             builder.Services.AddAutoMapper(typeof(Program));
             builder.Services.AddDbContext<AppDBContext>(
             options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            // TODO: Extension to builder to have the all repositories registered in single file
-            builder.Services.AddScoped<IBranchRepository, BranchRepository>();
-            builder.Services.AddScoped<IChoiceRepository, ChoiceRepository>();
-            builder.Services.AddScoped<ICoursesRepository, CoursesRepository>();
-            builder.Services.AddScoped<ITrackRepository, TracksRepository>();
-            builder.Services.AddScoped<IInstructorRepository, InstructorRepository>();
-            builder.Services.AddScoped<IExamRepository, ExamRepository>();
-            builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
-            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-            builder.Services.Configure<ApiBehaviorOptions>(options =>
-            {
-                options.InvalidModelStateResponseFactory = context =>
-                {
-                    var errors = context.ModelState
-                                        .Where(x => x.Value?.Errors.Count > 0)
-                                        .SelectMany(x => x.Value!.Errors)
-                                        .Select(x => x.ErrorMessage)
-                                        .ToList();
+            builder.Services.AddRepositories();
+            builder.Services.AddValidation();
 
-                    var errorResponse = new ApiResponse<object>()
-                    {
-                        Message = "Validation Failed",
-                        Errors = errors
-                    };
 
-                    return new BadRequestObjectResult(errorResponse);
-                };
-            });
 
             var app = builder.Build();
             app.UseMiddleware<GlobalExceptionHandlerMiddleware>();

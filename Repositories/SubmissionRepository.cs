@@ -12,15 +12,27 @@ namespace ExamNest.Repositories
     public class SubmissionRepository : GenericRepository, ISubmissionRepository
     {
         private readonly IMapper mapper;
-        public SubmissionRepository(AppDBContext appDB, IMapper _mapper) : base(appDB)
+        private readonly IExamRepository examRepository;
+        public SubmissionRepository(AppDBContext appDB, IExamRepository examRepository, IMapper _mapper) : base(appDB)
         {
             mapper = _mapper;
+            this.examRepository = examRepository;
         }
 
         public async Task<decimal?> Create(SubmissionInputDTO submission)
         {
+            var exam = await examRepository.GetExamById(submission.ExamID);
+            if (exam == null)
+            {
+                throw new ResourceNotFoundException("Exam not found!");
+            }
+            if (exam.ExamDate < DateTime.UtcNow)
+            {
+                throw new InvalidOperationException("Cannot submit exam after the exam date ;)");
+            }
             var answersJson = JsonConvert.SerializeObject(submission.Answers);
             var result = await appDBContextProcedures.SubmitExamAnswersAsync(submission.ExamID, submission.StudentID, answersJson);
+
             return result.FirstOrDefault()?.SubmissionID;
         }
 
@@ -54,7 +66,8 @@ namespace ExamNest.Repositories
         {
 
             var submission = await _appDBContext.ExamSubmissions
-                .FirstOrDefaultAsync(x => x.SubmissionId == id);
+                                .Include(x => x.Exam)
+                                .FirstOrDefaultAsync(x => x.SubmissionId == id);
 
             return submission;
 
@@ -64,9 +77,15 @@ namespace ExamNest.Repositories
         {
             // Find the Submission by ID
             var submission = await GetById(id);
+
             if (submission == null)
             {
                 throw new ResourceNotFoundException("Submission Not Found To Be Updated");
+            }
+            // Check if the exam date is in the past
+            if (submission.Exam.ExamDate < DateTime.UtcNow)
+            {
+                throw new InvalidOperationException("Cannot update submission after the exam date ;)");
             }
             submission.StudentAnswers = mapper.Map<List<StudentAnswer>>(entity.Answers);
             _appDBContext.Entry(submission).State = EntityState.Modified;

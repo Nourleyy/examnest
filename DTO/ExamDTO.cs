@@ -9,6 +9,7 @@ namespace ExamNest.DTO
         public string CourseName { get; set; }
         public int NoOfQuestions { get; set; }
         public DateTime ExamDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 
     public class ExamDTOValidator : AbstractValidator<ExamDTO>
@@ -25,7 +26,13 @@ namespace ExamNest.DTO
 
             RuleFor(e => e.ExamDate)
             .NotEmpty().WithMessage("Exam Date is required.")
-            .GreaterThanOrEqualTo(DateTime.Now).WithMessage("Exam Date cannot be in the past.");
+            .GreaterThanOrEqualTo(_ => DateTime.Now).WithMessage("Exam Date cannot be in the past.");
+
+            RuleFor(e => e.EndDate)
+                .NotEmpty().WithMessage("End Date is required.")
+                .GreaterThan(e => e.ExamDate).WithMessage("End Date must be greater than to Exam Date.");
+
+
         }
     }
 }

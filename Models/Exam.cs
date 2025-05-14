@@ -13,6 +13,7 @@ public partial class Exam
 
     public DateTime ExamDate { get; set; }
 
+    public DateTime EndDate { get; set; }
     public virtual Course Course { get; set; }
 
     public virtual ICollection<ExamSubmission> ExamSubmissions { get; set; } = new List<ExamSubmission>();
