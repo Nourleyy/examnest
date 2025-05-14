@@ -347,7 +347,7 @@ namespace ExamNest.Models
             return _;
         }
 
-        public virtual async Task<List<CreateExamAndGetIdResult>> CreateExamAndGetIdAsync(int? courseID, int? numberOfQuestions, DateTime? examDate, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<CreateExamAndGetIdResult>> CreateExamAndGetIdAsync(int? courseID, int? numberOfQuestions, DateTime? examDate, DateTime? endDate, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -376,9 +376,15 @@ namespace ExamNest.Models
                     Value = examDate ?? Convert.DBNull,
                     SqlDbType = System.Data.SqlDbType.DateTime,
                 },
+                new SqlParameter
+                {
+                    ParameterName = "EndDate",
+                    Value = endDate ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.DateTime,
+                },
                 parameterreturnValue,
             };
-            var _ = await _context.SqlQueryAsync<CreateExamAndGetIdResult>("EXEC @returnValue = [dbo].[CreateExamAndGetId] @CourseID = @CourseID, @NumberOfQuestions = @NumberOfQuestions, @ExamDate = @ExamDate", sqlParameters, cancellationToken);
+            var _ = await _context.SqlQueryAsync<CreateExamAndGetIdResult>("EXEC @returnValue = [dbo].[CreateExamAndGetId] @CourseID = @CourseID, @NumberOfQuestions = @NumberOfQuestions, @ExamDate = @ExamDate, @EndDate = @EndDate", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

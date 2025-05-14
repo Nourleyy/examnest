@@ -24,7 +24,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Course not found");
             }
-            var exam = await appDBContextProcedures.CreateExamAndGetIdAsync(examDto.CourseId, examDto.NoOfQuestions, examDto.ExamDate);
+            var exam = await appDBContextProcedures.CreateExamAndGetIdAsync(examDto.CourseId, examDto.NoOfQuestions, examDto.ExamDate, examDto.EndDate);
 
             if (exam.FirstOrDefault() == null)
             {
@@ -71,7 +71,8 @@ namespace ExamNest.Repositories
                     CourseId = e.CourseId,
                     CourseName = e.Course.CourseName,
                     ExamDate = e.ExamDate,
-                    NoOfQuestions = e.Questions.Count
+                    NoOfQuestions = e.Questions.Count,
+                    EndDate = e.EndDate
                 })
                 .Where(e => e.ExamId == id)
                 .FirstOrDefaultAsync();
