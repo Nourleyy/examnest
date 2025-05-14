@@ -1,4 +1,5 @@
-﻿using ExamNest.DTO;
+﻿using AutoMapper;
+using ExamNest.DTO;
 using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,10 +11,11 @@ namespace ExamNest.Controllers
     {
 
         private readonly ISubmissionRepository submissionRepository;
-
-        public SubmissionsController(ISubmissionRepository _submissionRepository)
+        private readonly IMapper mapper;
+        public SubmissionsController(ISubmissionRepository _submissionRepository, IMapper _mapper)
         {
             submissionRepository = _submissionRepository;
+            mapper = _mapper;
         }
 
         [HttpGet]
@@ -36,7 +38,11 @@ namespace ExamNest.Controllers
                 return NotFound("No Submission Found with this ID");
             }
 
-            return Ok(submission);
+
+
+
+
+            return Ok(mapper.Map<ExamSubmissionView>(submission));
         }
 
         [HttpGet("{id:int}/details")]

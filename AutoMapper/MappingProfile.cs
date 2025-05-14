@@ -36,6 +36,8 @@ namespace ExamNest.AutoMapper
             CreateMap<ExamInputDTO, ExamDTO>().ReverseMap();
             CreateMap<ExamUpdatePayloadDTO, ExamDTO>().ReverseMap();
 
+            CreateMap<ExamSubmission, ExamSubmissionView>();
+
 
 
         }
