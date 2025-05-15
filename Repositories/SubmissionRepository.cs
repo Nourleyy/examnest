@@ -99,7 +99,7 @@ namespace ExamNest.Repositories
         {
             var submissions = await _appDBContext.ExamSubmissions
                .Include(s => s.Student)
-               .ThenInclude(st => st.User)
+               //.ThenInclude(st => st.User)
                .Include(s => s.Exam)
                .ThenInclude(st => st.Course)
                .Skip(CalculatePagination(page))

@@ -13,10 +13,6 @@ namespace ExamNest.Models
 {
     public partial interface IAppDBContextProcedures
     {
-        Task<int> AddUserAsync(string name, string email, string password_hash, string provider, string provider_id, string role, int? student_id, int? instructor_id, bool? is_admin, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
-        Task<int> AssignPermissionToRoleAsync(int? role_id, int? permission_id, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
-        Task<int> AssignRoleToUserAsync(int? user_id, int? role_id, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
-        Task<List<AuthenticateUserResult>> AuthenticateUserAsync(string email, string password_hash, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CorrectExamResult>> CorrectExamAsync(int? submissionID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateBranchResult>> CreateBranchAsync(string branchName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateChoiceResult>> CreateChoiceAsync(int? questionID, string choiceLetter, string choiceText, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);

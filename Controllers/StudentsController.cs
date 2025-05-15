@@ -25,7 +25,6 @@ namespace ExamNest.Controllers
             var students = _context.Students
                 .Include(t => t.Track)
                 .Include(b => b.Branch)
-                .Include(u => u.User)
                 .ToList();
             return Ok(_mapper.Map<List<UserViewDTO>>(students));
         }
@@ -59,11 +58,11 @@ namespace ExamNest.Controllers
             {
                 return BadRequest("Branch Id not found");
             }
-            var UserSearch = _context.Users.FirstOrDefault(u => u.Id == Student.UserId);
-            if (UserSearch == null)
-            {
-                return BadRequest("User Id not found");
-            }
+            //var UserSearch = _context.Users.FirstOrDefault(u => u.Id == Student.UserId);
+            //if (UserSearch == null)
+            //{
+            //    return BadRequest("User Id not found");
+            //}
             var result = await _context.GetProcedures().CreateStudentAsync(Student.BranchId, Student.TrackId, Student.UserId);
             return Ok(result);
         }
@@ -80,11 +79,11 @@ namespace ExamNest.Controllers
             {
                 return BadRequest("Branch Id not found");
             }
-            var UserSearch = _context.Users.FirstOrDefault(u => u.Id == Student.UserId);
-            if (UserSearch == null)
-            {
-                return BadRequest("User Id not found");
-            }
+            //var UserSearch = _context.Users.FirstOrDefault(u => u.Id == Student.UserId);
+            //if (UserSearch == null)
+            //{
+            //    return BadRequest("User Id not found");
+            //}
             var result = await _context.GetProcedures().UpdateStudentAsync(id, Student.BranchId, Student.TrackId, Student.UserId);
             if (result[0].RowsUpdated == 0)
             {

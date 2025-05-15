@@ -15,22 +15,22 @@ namespace ExamNest.AutoMapper
             CreateMap<UserViewDTO, Instructor>()
                 .ReverseMap()
                 .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.Branch.BranchName))
-                .ForMember(dest => dest.TrackName, opt => opt.MapFrom(src => src.Track.TrackName))
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User.Name))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
+                .ForMember(dest => dest.TrackName, opt => opt.MapFrom(src => src.Track.TrackName));
+            //.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User.Name))
+            //.ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
             CreateMap<UserViewDTO, Student>()
                 .ReverseMap()
                 .ForMember(dest => dest.BranchName, opt => opt.MapFrom(src => src.Branch.BranchName))
-                .ForMember(dest => dest.TrackName, opt => opt.MapFrom(src => src.Track.TrackName))
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User.Name))
-                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
+                .ForMember(dest => dest.TrackName, opt => opt.MapFrom(src => src.Track.TrackName));
+            //.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.User.Name))
+            //.ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email));
             CreateMap<QuestionBankDTO, QuestionBank>().ReverseMap();
             CreateMap<ChoiceDTO, Choice>().ReverseMap();
             CreateMap<ExamDTO, Exam>().ReverseMap();
             CreateMap<SubmissionDTO, ExamSubmission>()
-                .ReverseMap()
-                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Student.User.Name))
-                .ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Exam.Course.CourseName));
+                .ReverseMap();
+            //.ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Student.User.Name))
+            //.ForMember(dest => dest.CourseName, opt => opt.MapFrom(src => src.Exam.Course.CourseName));
 
 
             CreateMap<ExamInputDTO, ExamDTO>().ReverseMap();

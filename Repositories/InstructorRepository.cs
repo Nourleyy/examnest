@@ -45,7 +45,7 @@ namespace ExamNest.Repositories
             var instructors = await _appDBContext.Instructors
               .Include(t => t.Track)
               .Include(b => b.Branch)
-              .Include(u => u.User)
+              //.Include(u => u.User)
               .Skip(CalculatePagination(page))
                 .Take(LimitPerPage)
               .ToListAsync();

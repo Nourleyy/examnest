@@ -21,5 +21,5 @@ public partial class Student
 
     public virtual Track Track { get; set; }
 
-    public virtual User User { get; set; }
+   // public virtual User User { get; set; }
 }
