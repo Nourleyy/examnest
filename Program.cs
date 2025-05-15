@@ -8,10 +8,11 @@ namespace ExamNest
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Services.AddIdentity(builder.Configuration);
 
             builder.Services.AddControllers(options => options.Filters.Add<ApiResponseFilter>());
 
@@ -35,11 +36,25 @@ namespace ExamNest
                 app.MapOpenApi();
                 app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
             }
+            app.Use(async (context, next) =>
+            {
+                var token = context.Request.Cookies["ExamNest.Token"];
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Request.Headers.Authorization = "Bearer " + token;
+                }
+                await next();
+            });
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
+            // Apply migrations and seed data.
+            using (var scope = app.Services.CreateScope())
+            {
+                await DataSeeder.InitializeAsync(scope.ServiceProvider);
+            }
 
             app.MapControllers();
 

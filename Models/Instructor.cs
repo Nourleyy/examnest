@@ -13,11 +13,11 @@ public partial class Instructor
 
     public int TrackId { get; set; }
 
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     public virtual Branch Branch { get; set; }
 
     public virtual Track Track { get; set; }
 
-  //  public virtual User User { get; set; }
+    public virtual User User { get; set; }
 }

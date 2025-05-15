@@ -45,7 +45,7 @@ namespace ExamNest.Repositories
                     CourseId = e.CourseId,
                     CourseName = e.Course.CourseName,
                     ExamDate = e.ExamDate,
-                    NoOfQuestions = e.Questions.Count
+                    NoOfQuestions = e.ExamQuestions.Count
                 })
                 .Skip(CalculatePagination(page))
                 .Take(LimitPerPage)
@@ -64,14 +64,14 @@ namespace ExamNest.Repositories
         {
             var exam = await _appDBContext.Exams
                 .Include(c => c.Course)
-                .Include(q => q.Questions)
+                .Include(q => q.ExamQuestions)
                 .Select(e => new ExamDTO
                 {
                     ExamId = e.ExamId,
                     CourseId = e.CourseId,
                     CourseName = e.Course.CourseName,
                     ExamDate = e.ExamDate,
-                    NoOfQuestions = e.Questions.Count,
+                    NoOfQuestions = e.ExamQuestions.Count,
                     EndDate = e.EndDate
                 })
                 .Where(e => e.ExamId == id)
