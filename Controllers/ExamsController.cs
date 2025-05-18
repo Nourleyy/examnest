@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using ExamNest.DTO;
-using ExamNest.Errors;
 using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,7 +41,10 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> DisplayExam(int id)
         {
             var exam = await examRepository.GetExam(id);
-            if (exam == null) throw new ResourceNotFoundException("No Exam with this ID");
+            if (exam == null)
+            {
+                return NotFound("No Exam by ID");
+            }
             return Ok(exam);
 
 
