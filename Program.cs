@@ -2,6 +2,7 @@ using ExamNest.Extensions;
 using ExamNest.Filters;
 using ExamNest.Middlewares;
 using ExamNest.Models;
+using ExamNest.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamNest
@@ -12,7 +13,6 @@ namespace ExamNest
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddIdentity(builder.Configuration);
 
             builder.Services.AddControllers(options => options.Filters.Add<ApiResponseFilter>());
 
@@ -23,7 +23,12 @@ namespace ExamNest
             builder.Services.AddDbContext<AppDBContext>(
             options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddRepositories();
+            builder.Services.AddIdentity(builder.Configuration);
+
             builder.Services.AddValidation();
+
+            builder.Services.AddScoped<UserManagementService>();
+            builder.Services.AddScoped<TokenManagementService>();
 
 
 

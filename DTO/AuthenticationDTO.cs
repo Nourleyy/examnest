@@ -2,14 +2,14 @@
 
 namespace ExamNest.DTO
 {
-    public class loginDTO
+    public class AuthenticationDTO
     {
-        public string Email { get; set; }
+        public string Email { get; set; } 
         public string Password { get; set; }
     }
-    public class LoginDTOValidation : AbstractValidator<loginDTO>
+    public class AuthenticationDTOValidation : AbstractValidator<AuthenticationDTO>
     {
-        public LoginDTOValidation()
+        public AuthenticationDTOValidation()
         {
             RuleFor(x => x.Email)
                 .NotEmpty()

@@ -1,11 +1,14 @@
 ﻿using ExamNest.DTO;
+using ExamNest.Enums;
 using ExamNest.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = $"{nameof(Roles.Student)},{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
     public class TracksController : ControllerBase
     {
         private readonly ITrackRepository trackRepository;
@@ -16,6 +19,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
+
         public async Task<IActionResult> GetTracks([FromQuery] int page = 1)
         {
             var tracks = await trackRepository.GetAll(page);
@@ -39,6 +43,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> InsertTrack(TrackDTO track)
         {
             var result = await trackRepository.Create(track);
@@ -46,6 +51,7 @@ namespace ExamNest.Controllers
 
         }
         [HttpPut]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> UpdateBranch(TrackDTO track, int id)
         {
 
@@ -55,6 +61,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = $"{nameof(Roles.Admin)}")]
         public async Task<IActionResult> DeleteTrack(int id)
         {
             try

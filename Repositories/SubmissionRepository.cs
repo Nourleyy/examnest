@@ -3,6 +3,7 @@ using ExamNest.DTO;
 using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -67,6 +68,8 @@ namespace ExamNest.Repositories
 
             var submission = await _appDBContext.ExamSubmissions
                                 .Include(x => x.Exam)
+                                .Include(x=> x.Student)
+                                .ThenInclude(y => y.User)
                                 .FirstOrDefaultAsync(x => x.SubmissionId == id);
 
             return submission;

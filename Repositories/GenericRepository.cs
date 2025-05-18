@@ -1,4 +1,7 @@
-﻿using ExamNest.Models;
+﻿using System.Security.Claims;
+using ExamNest.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 namespace ExamNest.Repositories
 {
@@ -9,6 +12,7 @@ namespace ExamNest.Repositories
 
         protected readonly AppDBContext _appDBContext;
         protected readonly IAppDBContextProcedures appDBContextProcedures;
+
         public GenericRepository(AppDBContext appDB)
         {
 
@@ -28,8 +32,6 @@ namespace ExamNest.Repositories
 
         }
 
-
-
-
+      
     }
 }

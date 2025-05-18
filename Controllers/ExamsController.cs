@@ -1,12 +1,17 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
 using ExamNest.DTO;
+using ExamNest.Enums;
 using ExamNest.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+
     public class ExamsController : ControllerBase
     {
         private readonly IExamRepository examRepository;
@@ -22,6 +27,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> GetExamsAsync([FromQuery] int page = 1)
         {
             var exams = await examRepository.GetExams(page);
@@ -30,14 +36,19 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = $"{nameof(Roles.Student)},{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> GetById(int id)
         {
-
+           
             var exam = await examRepository.GetExamDetailsById(id);
+
+          
+
             return Ok(exam);
         }
 
         [HttpGet("{id:int}/display")]
+        [Authorize(Roles = $"{nameof(Roles.Student)},{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> DisplayExam(int id)
         {
             var exam = await examRepository.GetExam(id);
@@ -51,10 +62,12 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet("student-results")]
-        public async Task<IActionResult> GetStudentExamResults([FromQuery] int studentId, [FromQuery] int? examId = null)
+        [Authorize(Roles = $"{nameof(Roles.Student)},{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+        public async Task<IActionResult> GetStudentExamResults( [FromQuery] int? examId = null)
         {
-
-            var results = await examRepository.GetExamResultByStudentId(studentId, examId.Value);
+            var CurrentUserId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            //var GetStudentIdFromUserId = await studentRepo.GetStudentIdFromUserId(CurrentUserId);
+            var results = await examRepository.GetExamResultByStudentId(1, examId.Value);
 
             return Ok(results);
 
@@ -62,6 +75,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> CreateExam(ExamInputDTO examPayloadDto)
         {
 
@@ -74,6 +88,7 @@ namespace ExamNest.Controllers
 
 
         [HttpPut]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> UpdateExam([FromQuery] ExamUpdatePayloadDTO examUpdatePayload)
         {
 
@@ -84,6 +99,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = $"{nameof(Roles.Admin)}")]
         public async Task<IActionResult> DeleteExam([FromQuery] int id)
         {
 

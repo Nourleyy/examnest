@@ -63,7 +63,7 @@ namespace ExamNest.Controllers
             //{
             //    return BadRequest("User Id not found");
             //}
-            var result = await _context.GetProcedures().CreateStudentAsync(Student.BranchId, Student.TrackId, Student.UserId);
+            var result = await _context.GetProcedures().CreateStudentAsync(Student.BranchId, Student.TrackId, "1");
             return Ok(result);
         }
         [HttpPut]

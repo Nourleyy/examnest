@@ -1,4 +1,5 @@
-﻿using ExamNest.Models;
+﻿using ExamNest.Enums;
+using ExamNest.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -8,6 +9,21 @@ namespace ExamNest.Extensions
 {
     public static class Identity
     {
+
+        public static TokenValidationParameters GetTokenValidationParameters(IConfiguration config)
+        {
+            return new TokenValidationParameters
+            {
+                ClockSkew = TimeSpan.Zero,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = config["Jwt:Issuer"],
+                ValidAudience = config["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]))
+            };
+        }
         public static IServiceCollection AddIdentity(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddIdentity<User, IdentityRole>(options =>
@@ -31,17 +47,9 @@ namespace ExamNest.Extensions
                     })
                     .AddJwtBearer(options =>
                     {
-                        options.TokenValidationParameters = new TokenValidationParameters
-                        {
-                            ValidateIssuer = true,
-                            ValidateAudience = true,
-                            ValidateLifetime = true,
-                            ValidateIssuerSigningKey = true,
-                            ValidIssuer = configuration["Jwt:Issuer"],
-                            ValidAudience = configuration["Jwt:Audience"],
-                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
-                        };
+                        options.TokenValidationParameters = GetTokenValidationParameters(configuration);
                     });
+        
 
             return services;
         }

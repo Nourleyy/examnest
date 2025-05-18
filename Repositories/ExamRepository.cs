@@ -115,7 +115,6 @@ namespace ExamNest.Repositories
 
         public async Task<GetStudentExamResultsResult?> GetExamResultByStudentId(int studentId, int examId)
         {
-            //TODO: Add Student Check 
 
             var exam = await GetExamById(examId);
             if (exam == null)

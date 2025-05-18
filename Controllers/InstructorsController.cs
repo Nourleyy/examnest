@@ -1,11 +1,15 @@
 ﻿using ExamNest.DTO;
+using ExamNest.Enums;
 using ExamNest.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
+
     public class InstructorsController : ControllerBase
     {
         public readonly IInstructorRepository InstructorRepository;
@@ -16,6 +20,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> GetInstructorsAsync([FromQuery] int page = 1)
         {
             var instructors = await InstructorRepository.GetAll(page);
@@ -23,6 +28,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = $"{nameof(Roles.Student)},{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> GetById(int id)
         {
             var instructor = await InstructorRepository.GetById(id);
@@ -36,6 +42,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> InsertInstructor(UserDTO instructor)
         {
 
@@ -45,6 +52,7 @@ namespace ExamNest.Controllers
 
         }
         [HttpPut]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> UpdateInstructor(UserDTO instructor, int id)
         {
             var updated = await InstructorRepository.Update(id, instructor);
@@ -54,6 +62,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = $"{nameof(Roles.Admin)}")]
         public async Task<IActionResult> DeleteInstructor(int id)
         {
 
