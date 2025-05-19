@@ -1,11 +1,15 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Question;
+using ExamNest.Enums;
 using ExamNest.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+
     public class QuestionBankController : ControllerBase
     {
 
@@ -20,6 +24,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
+
         public async Task<IActionResult> GetQuestionBank([FromQuery] int page = 1)
         {
             var Questions = await questionRepository.GetAll(page);
@@ -67,6 +72,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = $"{nameof(Roles.Admin)}")]
         public async Task<IActionResult> DeleteQuestion(int id)
         {
             var isDeleted = await questionRepository.Delete(id);

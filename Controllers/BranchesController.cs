@@ -1,11 +1,14 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Track;
+using ExamNest.Enums;
 using ExamNest.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BranchesController : ControllerBase
     {
         private readonly IBranchRepository branchRepository;
@@ -15,6 +18,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
+
         public async Task<IActionResult> GetBranches([FromQuery] int page = 1)
         {
             var branches = await branchRepository.GetAll(page);
@@ -37,6 +41,8 @@ namespace ExamNest.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+
         public async Task<IActionResult> InsertBranch(BranchDTO branch)
         {
 
@@ -49,6 +55,8 @@ namespace ExamNest.Controllers
             return RedirectToAction(nameof(GetById), new { id = result });
         }
         [HttpPut]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+
         public async Task<IActionResult> UpdateBranch(BranchDTO branch, int id)
         {
             var result = await branchRepository.Update(id, branch);
@@ -65,6 +73,8 @@ namespace ExamNest.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = $"{nameof(Roles.Admin)}")]
+
         public async Task<IActionResult> DeleteBranch(int id)
         {
 

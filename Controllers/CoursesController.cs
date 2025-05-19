@@ -1,11 +1,15 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Course;
+using ExamNest.Enums;
 using ExamNest.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = $"{nameof(Roles.Student)},{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+
     public class CoursesController : ControllerBase
     {
         private readonly ICoursesRepository coursesRepository;
@@ -16,6 +20,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
+
         public async Task<IActionResult> GetAll([FromQuery] int page = 1)
         {
             var courses = await coursesRepository.GetAll(page);
@@ -31,6 +36,8 @@ namespace ExamNest.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+
         public async Task<IActionResult> InsertCourse(CourseDTO course)
         {
 
@@ -38,6 +45,8 @@ namespace ExamNest.Controllers
             return RedirectToAction(nameof(GetById), new { id = result });
         }
         [HttpPut]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+
         public async Task<IActionResult> UpdateCourse(CourseDTO course, int id)
         {
             var result = await coursesRepository.Update(id, course);
@@ -45,6 +54,8 @@ namespace ExamNest.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = $"{nameof(Roles.Admin)}")]
+
         public async Task<IActionResult> DeleteCourse(int id)
         {
 

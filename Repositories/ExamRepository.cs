@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using ExamNest.DTO;
+using ExamNest.DTO.Exam;
+using ExamNest.DTO.Question;
 using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
@@ -24,7 +26,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Course not found");
             }
-            var exam = await appDBContextProcedures.CreateExamAndGetIdAsync(examDto.CourseId, examDto.NoOfQuestions, examDto.ExamDate, examDto.EndDate);
+            var exam = await AppDbContextProcedures.CreateExamAndGetIdAsync(examDto.CourseId, examDto.NoOfQuestions, examDto.ExamDate, examDto.EndDate);
 
             if (exam.FirstOrDefault() == null)
             {
@@ -37,7 +39,7 @@ namespace ExamNest.Repositories
 
         public async Task<IEnumerable<ExamDTO?>> GetExams(int page)
         {
-            var exams = await _appDBContext.Exams
+            var exams = await AppDbContext.Exams
                 .Include(c => c.Course)
                 .Select(e => new ExamDTO
                 {
@@ -45,7 +47,7 @@ namespace ExamNest.Repositories
                     CourseId = e.CourseId,
                     CourseName = e.Course.CourseName,
                     ExamDate = e.ExamDate,
-                    NoOfQuestions = e.Questions.Count
+                    NoOfQuestions = e.ExamQuestions.Count
                 })
                 .Skip(CalculatePagination(page))
                 .Take(LimitPerPage)
@@ -55,23 +57,23 @@ namespace ExamNest.Repositories
 
         public async Task<GetExamDetailsResult?> GetExamDetailsById(int id)
         {
-            var exam = await appDBContextProcedures.GetExamDetailsAsync(id);
+            var exam = await AppDbContextProcedures.GetExamDetailsAsync(id);
 
             return exam.FirstOrDefault();
         }
 
         public async Task<ExamDTO?> GetExamById(int id)
         {
-            var exam = await _appDBContext.Exams
+            var exam = await AppDbContext.Exams
                 .Include(c => c.Course)
-                .Include(q => q.Questions)
+                .Include(q => q.ExamQuestions)
                 .Select(e => new ExamDTO
                 {
                     ExamId = e.ExamId,
                     CourseId = e.CourseId,
                     CourseName = e.Course.CourseName,
                     ExamDate = e.ExamDate,
-                    NoOfQuestions = e.Questions.Count,
+                    NoOfQuestions = e.ExamQuestions.Count,
                     EndDate = e.EndDate
                 })
                 .Where(e => e.ExamId == id)
@@ -85,13 +87,13 @@ namespace ExamNest.Repositories
 
         public async Task<bool> Delete(int id)
         {
-            var exam = await _appDBContext.Exams.FindAsync(id);
+            var exam = await AppDbContext.Exams.FindAsync(id);
             if (exam == null)
             {
                 throw new ResourceNotFoundException("Exam not found to be deleted");
             }
-            _appDBContext.Exams.Remove(exam);
-            await _appDBContext.SaveChangesAsync();
+            AppDbContext.Exams.Remove(exam);
+            await AppDbContext.SaveChangesAsync();
             return true;
         }
 
@@ -106,7 +108,7 @@ namespace ExamNest.Repositories
 
             exam.ExamDate = entity.ExamDate;
 
-            await _appDBContext.SaveChangesAsync();
+            await AppDbContext.SaveChangesAsync();
 
             return id;
 
@@ -115,14 +117,13 @@ namespace ExamNest.Repositories
 
         public async Task<GetStudentExamResultsResult?> GetExamResultByStudentId(int studentId, int examId)
         {
-            //TODO: Add Student Check 
 
             var exam = await GetExamById(examId);
             if (exam == null)
             {
                 throw new ResourceNotFoundException("Exam not found");
             }
-            var result = await appDBContextProcedures.GetStudentExamResultsAsync(studentId, examId);
+            var result = await AppDbContextProcedures.GetStudentExamResultsAsync(studentId, examId);
 
 
             return result.FirstOrDefault();
@@ -138,12 +139,12 @@ namespace ExamNest.Repositories
                 throw new ResourceNotFoundException("No Exam with this ID");
             }
 
-            var questions = await appDBContextProcedures.GetExamQuestionListAsync(id);
+            var questions = await AppDbContextProcedures.GetExamQuestionListAsync(id);
             if (questions == null || questions.Count == 0)
             {
                 throw new ResourceNotFoundException("Exam has No Questions");
             }
-            var choices = await appDBContextProcedures.GetExamChoiceListAsync(id);
+            var choices = await AppDbContextProcedures.GetExamChoiceListAsync(id);
             if (choices == null || choices.Count == 0)
             {
                 throw new ResourceNotFoundException("No Choices for this Exam");

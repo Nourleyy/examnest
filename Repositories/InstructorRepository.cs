@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
-using ExamNest.DTO;
+using ExamNest.DTO.Authentication;
 using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
+using ExamNest.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamNest.Repositories
@@ -13,36 +14,39 @@ namespace ExamNest.Repositories
     {
         private readonly ITrackRepository _trackRepository;
         private readonly IBranchRepository _branchRepository;
+        private readonly IUserManagement userManagementService;
         private readonly IMapper mapper;
-        public InstructorRepository(AppDBContext appDB, ITrackRepository trackRepository, IBranchRepository branchRepository, IMapper _mapper) : base(appDB)
+        public InstructorRepository(AppDBContext appDB, ITrackRepository trackRepository, IBranchRepository branchRepository, IMapper _mapper, IUserManagement userManagementService) : base(appDB)
         {
             _trackRepository = trackRepository;
             _branchRepository = branchRepository;
             mapper = _mapper;
+            this.userManagementService = userManagementService;
         }
 
-        public async Task<decimal?> Create(UserDTO userDto)
+        public async Task<decimal?> Create(Instructor userDto)
         {
             var trackSearch = await _trackRepository.GetById(userDto.TrackId);
             var branchSearch = await _branchRepository.GetById(userDto.BranchId);
 
             if (trackSearch == null || branchSearch == null) throw new ResourceNotFoundException("Either Track or Branch Not Found");
 
-            //var UserSearch = _context.Users.FirstOrDefault(u => u.Id == instructor.UserId);
-            //if (UserSearch == null)
-            //{
-            //    return BadRequest("User Id not found");
-            //}
-            var result = await appDBContextProcedures.CreateInstructorAsync(userDto.BranchId, userDto.TrackId, userDto.UserId);
+            var userSearch = userManagementService.IsUserExistById(userDto.UserId);
+            if (userSearch == null)
+            {
+                throw new ResourceNotFoundException("User Id not found");
+            }
+
+            var result = await AppDbContextProcedures.CreateInstructorAsync(userDto.BranchId, userDto.TrackId, userDto.UserId);
             return result.FirstOrDefault()?.InstructorID;
 
         }
 
 
 
-        public async Task<IEnumerable<UserViewDTO>> GetAll(int page)
+        public async Task<IEnumerable<InstructorViewDto>> GetAll(int page)
         {
-            var instructors = await _appDBContext.Instructors
+            var instructors = await AppDbContext.Instructors
               .Include(t => t.Track)
               .Include(b => b.Branch)
               .Include(u => u.User)
@@ -50,18 +54,18 @@ namespace ExamNest.Repositories
                 .Take(LimitPerPage)
               .ToListAsync();
 
-            return mapper.Map<IEnumerable<UserViewDTO>>(instructors);
+            return mapper.Map<IEnumerable<InstructorViewDto>>(instructors);
 
         }
 
         public async Task<GetInstructorByIDResult?> GetById(int id)
         {
-            var instructor = await appDBContextProcedures.GetInstructorByIDAsync(id);
+            var instructor = await AppDbContextProcedures.GetInstructorByIDAsync(id);
 
             return instructor.FirstOrDefault();
         }
 
-        public async Task<int?> Update(int id, UserDTO entity)
+        public async Task<int?> Update(int id, Instructor entity)
         {
             var instructor = await GetById(id);
             if (instructor == null ||
@@ -71,13 +75,14 @@ namespace ExamNest.Repositories
                 throw new ResourceNotFoundException("Either Track or Branch or instructor Not Found");
             }
 
-            //var UserSearch = _context.Users.FirstOrDefault(u => u.Id == instructor.UserId);
-            //if (UserSearch == null)
-            //{
-            //    return BadRequest("User Id not found");
-            //}
+            var userSearch = userManagementService.IsUserExistById(entity.UserId);
+            if (userSearch == null)
+            {
+                throw new ResourceNotFoundException("User Id not found");
+            }
 
-            var result = await appDBContextProcedures.UpdateInstructorAsync(id, entity.BranchId, entity.TrackId, entity.UserId);
+
+            var result = await AppDbContextProcedures.UpdateInstructorAsync(id, entity.BranchId, entity.TrackId, entity.UserId);
             return result.FirstOrDefault()?.RowsUpdated > 0 ? id : null;
 
 
@@ -89,9 +94,17 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Instructor not found to be deleted");
             }
-            var deleted = await appDBContextProcedures.DeleteInstructorAsync(id);
+            var deleted = await AppDbContextProcedures.DeleteInstructorAsync(id);
 
             return deleted.FirstOrDefault()?.RowsDeleted > 0;
+        }
+
+        public async Task<InstructorViewDto?> GetInstructorByUserId(string userId)
+        {
+            var instructor = await AppDbContext.Instructors
+                .FirstOrDefaultAsync(i => i.UserId == userId);
+
+            return instructor == null ? null : mapper.Map<InstructorViewDto>(instructor);
         }
     }
 

@@ -20,6 +20,9 @@ namespace ExamNest.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<GlobalExceptionHandlerMiddleware> _logger;
+        private readonly string[] _methodsRequiringBody = ["POST", "PUT", "PATCH"];
+
+
 
         public GlobalExceptionHandlerMiddleware(RequestDelegate next, ILogger<GlobalExceptionHandlerMiddleware> logger)
         {
@@ -29,6 +32,21 @@ namespace ExamNest.Middlewares
 
         public async Task Invoke(HttpContext context)
         {
+            var requestMethod = context.Request.Method.ToUpperInvariant();
+            if (_methodsRequiringBody.Contains(requestMethod) && string.IsNullOrEmpty(context.Request.ContentType))
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.UnsupportedMediaType;
+                context.Response.ContentType = "application/json";
+
+                var error = new ApiResponse<object>
+                {
+                    Message = "Unsupported Media Type",
+                    Errors = new List<string> { $"Content-Type is missing. Only 'application/json' is accepted." }
+                };
+
+                await context.Response.WriteAsJsonAsync(error);
+                return;
+            }
             try
             {
                 await _next(context);
@@ -56,11 +74,24 @@ namespace ExamNest.Middlewares
                 _logger.LogError(ex, "ResourceNotFoundException");
                 await HandleResourceNotFoundException(context, ex);
             }
-            catch (ResourceAlreadyExistsException ex)
-            {
-                _logger.LogError(ex, "ResourceAlreadyExistsException");
-                await HandleGenericException(context, ex);
 
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "HandleUnauthorizedException");
+                await HandleUnauthorizedException(context, ex);
+
+            }
+            catch (BadHttpRequestException ex)
+            {
+                _logger.LogError(ex, "BadHttpRequestException");
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                context.Response.ContentType = "application/json";
+                var error = new ApiResponse<object>
+                {
+                    Message = "Bad Request",
+                    Errors = ex.Message.Split(",").ToList()
+                };
+                await context.Response.WriteAsJsonAsync(error);
             }
             catch (Exception ex)
             {
@@ -80,6 +111,22 @@ namespace ExamNest.Middlewares
             };
 
             return context.Response.WriteAsJsonAsync(error);
+        }
+
+        private Task HandleUnauthorizedException(HttpContext context, UnauthorizedAccessException ex)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+
+            var error = new ApiResponse<object>
+            {
+
+                Message = "Unauthorized",
+                Errors = new List<string> { ex.Message }
+            };
+            return context.Response.WriteAsJsonAsync(error);
+
+
         }
         private Task HandleResourceDeleteException(HttpContext context, ResourceDeleteException ex)
         {
@@ -144,5 +191,6 @@ namespace ExamNest.Middlewares
 
             await context.Response.WriteAsJsonAsync(error);
         }
+
     }
 }

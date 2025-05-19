@@ -1,4 +1,4 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Track;
 using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
@@ -22,7 +22,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Branch not found");
             }
-            var Created = await appDBContextProcedures.CreateTrackAsync(trackDto.BranchId, trackDto.TrackName);
+            var Created = await AppDbContextProcedures.CreateTrackAsync(trackDto.BranchId, trackDto.TrackName);
             return Created.FirstOrDefault()?.TrackID;
         }
 
@@ -33,7 +33,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Track not found to be deleted");
             }
-            var Deleted = await appDBContextProcedures.DeleteTrackAsync(id);
+            var Deleted = await AppDbContextProcedures.DeleteTrackAsync(id);
             return Deleted.FirstOrDefault().RowsDeleted > 0;
 
 
@@ -41,14 +41,14 @@ namespace ExamNest.Repositories
 
         public async Task<IEnumerable<GetAllTracksResult>> GetAll(int page)
         {
-            IEnumerable<GetAllTracksResult> trackList = await appDBContextProcedures.GetAllTracksAsync();
+            IEnumerable<GetAllTracksResult> trackList = await AppDbContextProcedures.GetAllTracksAsync();
             var paginatedResult = trackList.Skip(CalculatePagination(page)).Take(LimitPerPage);
             return paginatedResult;
         }
 
         public async Task<GetTrackByIDResult?> GetById(int id)
         {
-            var trackList = await appDBContextProcedures.GetTrackByIDAsync(id);
+            var trackList = await AppDbContextProcedures.GetTrackByIDAsync(id);
             return trackList.FirstOrDefault();
         }
 
@@ -59,7 +59,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Branch not found");
             }
-            var update = await appDBContextProcedures.UpdateTrackAsync(id, entity.BranchId, entity.TrackName);
+            var update = await AppDbContextProcedures.UpdateTrackAsync(id, entity.BranchId, entity.TrackName);
             return id;
         }
 

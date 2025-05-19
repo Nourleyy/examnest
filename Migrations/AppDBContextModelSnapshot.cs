@@ -17,7 +17,7 @@ namespace ExamNest.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -132,6 +132,24 @@ namespace ExamNest.Migrations
                     b.ToTable("Exams");
                 });
 
+            modelBuilder.Entity("ExamNest.Models.ExamQuestion", b =>
+                {
+                    b.Property<int>("ExamId")
+                        .HasColumnType("int")
+                        .HasColumnName("ExamID");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("int")
+                        .HasColumnName("QuestionID");
+
+                    b.HasKey("ExamId", "QuestionId")
+                        .HasName("PK__ExamQues__F9A9275F2895A4B0");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("ExamQuestions", (string)null);
+                });
+
             modelBuilder.Entity("ExamNest.Models.ExamSubmission", b =>
                 {
                     b.Property<int>("SubmissionId")
@@ -184,8 +202,8 @@ namespace ExamNest.Migrations
                         .HasColumnType("int")
                         .HasColumnName("TrackID");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("InstructorId")
@@ -198,31 +216,6 @@ namespace ExamNest.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Instructors");
-                });
-
-            modelBuilder.Entity("ExamNest.Models.Permission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Permissi__3213E83F98131AD6");
-
-                    b.HasIndex(new[] { "Name" }, "UQ__Permissi__72E12F1B4B9C5D27")
-                        .IsUnique();
-
-                    b.ToTable("Permissions", "Auth");
                 });
 
             modelBuilder.Entity("ExamNest.Models.QuestionBank", b =>
@@ -269,66 +262,6 @@ namespace ExamNest.Migrations
                     b.ToTable("QuestionBank", (string)null);
                 });
 
-            modelBuilder.Entity("ExamNest.Models.Role", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Roles__3213E83FF97406C0");
-
-                    b.HasIndex(new[] { "Name" }, "UQ__Roles__72E12F1B9C496B68")
-                        .IsUnique();
-
-                    b.ToTable("Roles", "Auth");
-                });
-
-            modelBuilder.Entity("ExamNest.Models.Session", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime")
-                        .HasColumnName("expires_at");
-
-                    b.Property<string>("SessionToken")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("session_token");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Sessions__3213E83FE960D0F3");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex(new[] { "SessionToken" }, "UQ__Sessions__E598F5C881DE4E17")
-                        .IsUnique();
-
-                    b.ToTable("Sessions", "Auth");
-                });
-
             modelBuilder.Entity("ExamNest.Models.Student", b =>
                 {
                     b.Property<int>("StudentId")
@@ -346,8 +279,8 @@ namespace ExamNest.Migrations
                         .HasColumnType("int")
                         .HasColumnName("TrackID");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("StudentId")
@@ -417,134 +350,204 @@ namespace ExamNest.Migrations
 
             modelBuilder.Entity("ExamNest.Models.User", b =>
                 {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
+                        .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("(getdate())");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Email")
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("email");
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("InstructorId")
-                        .HasColumnType("int")
-                        .HasColumnName("instructor_id");
-
-                    b.Property<bool?>("IsAdmin")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_admin");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(100)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("name");
-
-                    b.Property<string>("PasswordHash")
-                        .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("password_hash");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("provider");
-
-                    b.Property<string>("ProviderId")
-                        .HasMaxLength(255)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("provider_id");
-
-                    b.Property<string>("Role")
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(50)")
-                        .HasDefaultValue("Guest")
-                        .HasColumnName("role");
-
-                    b.Property<int?>("StudentId")
-                        .HasColumnType("int")
-                        .HasColumnName("student_id");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Users__3213E83F1AED758A");
-
-                    b.HasIndex(new[] { "Email" }, "UQ__Users__AB6E6164B3034577")
-                        .IsUnique();
-
-                    b.ToTable("Users", "Auth");
-                });
-
-            modelBuilder.Entity("ExamQuestion", b =>
-                {
-                    b.Property<int>("ExamId")
-                        .HasColumnType("int")
-                        .HasColumnName("ExamID");
-
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int")
-                        .HasColumnName("QuestionID");
-
-                    b.HasKey("ExamId", "QuestionId")
-                        .HasName("PK__ExamQues__F9A9275F2895A4B0");
-
-                    b.HasIndex("QuestionId");
-
-                    b.ToTable("ExamQuestions", (string)null);
-                });
-
-            modelBuilder.Entity("RolePermission", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int")
-                        .HasColumnName("role_id");
-
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("int")
-                        .HasColumnName("permission_id");
-
-                    b.HasKey("RoleId", "PermissionId")
-                        .HasName("PK__RolePerm__C85A54630F43173E");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("RolePermissions", "Auth");
-                });
-
-            modelBuilder.Entity("UserRole", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int")
-                        .HasColumnName("role_id");
-
-                    b.HasKey("UserId", "RoleId")
-                        .HasName("PK__UserRole__6EDEA153BE007F51");
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("UserRoles", "Auth");
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
                 });
 
             modelBuilder.Entity("ExamNest.Models.Choice", b =>
@@ -578,6 +581,25 @@ namespace ExamNest.Migrations
                         .HasConstraintName("FK__Exams__CourseID__4E88ABD4");
 
                     b.Navigation("Course");
+                });
+
+            modelBuilder.Entity("ExamNest.Models.ExamQuestion", b =>
+                {
+                    b.HasOne("ExamNest.Models.Exam", "Exam")
+                        .WithMany("ExamQuestions")
+                        .HasForeignKey("ExamId")
+                        .IsRequired()
+                        .HasConstraintName("FK__ExamQuest__ExamI__5165187F");
+
+                    b.HasOne("ExamNest.Models.QuestionBank", "Question")
+                        .WithMany("ExamQuestions")
+                        .HasForeignKey("QuestionId")
+                        .IsRequired()
+                        .HasConstraintName("FK__ExamQuest__Quest__52593CB8");
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("ExamNest.Models.ExamSubmission", b =>
@@ -614,10 +636,8 @@ namespace ExamNest.Migrations
                         .HasConstraintName("FK__Instructo__Track__403A8C7D");
 
                     b.HasOne("ExamNest.Models.User", "User")
-                        .WithMany("Instructors")
-                        .HasForeignKey("UserId")
-                        .IsRequired()
-                        .HasConstraintName("FK_Instructors_Users");
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Branch");
 
@@ -637,18 +657,6 @@ namespace ExamNest.Migrations
                     b.Navigation("Course");
                 });
 
-            modelBuilder.Entity("ExamNest.Models.Session", b =>
-                {
-                    b.HasOne("ExamNest.Models.User", "User")
-                        .WithMany("Sessions")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__Sessions__user_i__2A164134");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ExamNest.Models.Student", b =>
                 {
                     b.HasOne("ExamNest.Models.Branch", "Branch")
@@ -664,10 +672,8 @@ namespace ExamNest.Migrations
                         .HasConstraintName("FK__Students__TrackI__440B1D61");
 
                     b.HasOne("ExamNest.Models.User", "User")
-                        .WithMany("Students")
-                        .HasForeignKey("UserId")
-                        .IsRequired()
-                        .HasConstraintName("FK_Students_Users");
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Branch");
 
@@ -706,53 +712,55 @@ namespace ExamNest.Migrations
                     b.Navigation("Branch");
                 });
 
-            modelBuilder.Entity("ExamQuestion", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("ExamNest.Models.Exam", null)
-                        .WithMany()
-                        .HasForeignKey("ExamId")
-                        .IsRequired()
-                        .HasConstraintName("FK__ExamQuest__ExamI__5165187F");
-
-                    b.HasOne("ExamNest.Models.QuestionBank", null)
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .IsRequired()
-                        .HasConstraintName("FK__ExamQuest__Quest__52593CB8");
-                });
-
-            modelBuilder.Entity("RolePermission", b =>
-                {
-                    b.HasOne("ExamNest.Models.Permission", null)
-                        .WithMany()
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__RolePermi__permi__37703C52");
-
-                    b.HasOne("ExamNest.Models.Role", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__RolePermi__role___367C1819");
+                        .IsRequired();
                 });
 
-            modelBuilder.Entity("UserRole", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("ExamNest.Models.Role", null)
+                    b.HasOne("ExamNest.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("ExamNest.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__UserRoles__role___339FAB6E");
+                        .IsRequired();
 
                     b.HasOne("ExamNest.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK__UserRoles__user___32AB8735");
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("ExamNest.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ExamNest.Models.Branch", b =>
@@ -773,6 +781,8 @@ namespace ExamNest.Migrations
 
             modelBuilder.Entity("ExamNest.Models.Exam", b =>
                 {
+                    b.Navigation("ExamQuestions");
+
                     b.Navigation("ExamSubmissions");
                 });
 
@@ -784,6 +794,8 @@ namespace ExamNest.Migrations
             modelBuilder.Entity("ExamNest.Models.QuestionBank", b =>
                 {
                     b.Navigation("Choices");
+
+                    b.Navigation("ExamQuestions");
 
                     b.Navigation("StudentAnswers");
                 });
@@ -798,15 +810,6 @@ namespace ExamNest.Migrations
                     b.Navigation("Courses");
 
                     b.Navigation("Instructors");
-
-                    b.Navigation("Students");
-                });
-
-            modelBuilder.Entity("ExamNest.Models.User", b =>
-                {
-                    b.Navigation("Instructors");
-
-                    b.Navigation("Sessions");
 
                     b.Navigation("Students");
                 });

@@ -1,11 +1,15 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Question;
+using ExamNest.Enums;
 using ExamNest.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamNest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+
     public class ChoicesController : ControllerBase
     {
         private readonly IChoiceRepository choiceRepository;

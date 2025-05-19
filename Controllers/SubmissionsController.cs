@@ -1,12 +1,17 @@
 ﻿using AutoMapper;
-using ExamNest.DTO;
+using ExamNest.DTO.Exam;
+using ExamNest.DTO.Submission;
+using ExamNest.Enums;
 using ExamNest.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ExamNest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SubmissionsController : ControllerBase
     {
 
@@ -19,6 +24,7 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
         public async Task<IActionResult> GetSubmissions([FromQuery] int page = 1)
         {
 
@@ -29,9 +35,14 @@ namespace ExamNest.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Roles = $"{nameof(Roles.Student)},{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+
         public async Task<IActionResult> GetById(int id)
         {
+
             var submission = await submissionRepository.GetById(id);
+
+
 
             if (submission == null)
             {
@@ -41,11 +52,24 @@ namespace ExamNest.Controllers
 
 
 
+            if (!User.IsInRole(nameof(Roles.Student))) return Ok(mapper.Map<ExamSubmissionView>(submission));
+            var userId = submission.Student.UserId;
+
+            var currentUser = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId != currentUser)
+            {
+                return Unauthorized("You are not allowed to access this submission");
+            }
+
+
 
             return Ok(mapper.Map<ExamSubmissionView>(submission));
         }
 
         [HttpGet("{id:int}/details")]
+        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
+
         public async Task<IActionResult> GetSubmissionDetails(int id)
         {
             var details = await submissionRepository.GetSubmissionDetails(id);
@@ -54,7 +78,9 @@ namespace ExamNest.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> InsertSubmission(SubmissionInputDTO request)
+        [Authorize(Roles = $"{nameof(Roles.Student)}")]
+
+        public async Task<IActionResult> InsertSubmission(SubmissionPayload request)
         {
 
             // TODO: After Identity We will extract the userId from the token
@@ -65,6 +91,8 @@ namespace ExamNest.Controllers
         }
 
         [HttpDelete]
+        [Authorize(Roles = $"{nameof(Roles.Admin)}")]
+
         public async Task<IActionResult> DeleteSubmissionAsync(int id)
         {
 

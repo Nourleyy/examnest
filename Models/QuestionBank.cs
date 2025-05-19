@@ -24,6 +24,6 @@ public partial class QuestionBank
     public virtual Course Course { get; set; }
 
     public virtual ICollection<StudentAnswer> StudentAnswers { get; set; } = new List<StudentAnswer>();
+    public virtual ICollection<ExamQuestion> ExamQuestions { get; set; }
 
-    public virtual ICollection<Exam> Exams { get; set; } = new List<Exam>();
 }

@@ -1,4 +1,5 @@
 ﻿using ExamNest.DTO;
+using ExamNest.DTO.Question;
 using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
@@ -24,7 +25,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Course not found");
             }
-            var result = await appDBContextProcedures.CreateQuestionAsync(question.CourseId, question.QuestionText, question.QuestionType, question.ModelAnswer, question.Points);
+            var result = await AppDbContextProcedures.CreateQuestionAsync(question.CourseId, question.QuestionText, question.QuestionType, question.ModelAnswer, question.Points);
 
             return result.FirstOrDefault()?.QuestionID;
         }
@@ -36,14 +37,14 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Question not found to be deleted");
             }
-            var result = await appDBContextProcedures.DeleteQuestionAsync(id);
+            var result = await AppDbContextProcedures.DeleteQuestionAsync(id);
             return result.FirstOrDefault().RowsDeleted > 0;
 
         }
 
         public async Task<IEnumerable<GetAllQuestionsResult>> GetAll(int page)
         {
-            var result = await appDBContextProcedures.GetAllQuestionsAsync();
+            var result = await AppDbContextProcedures.GetAllQuestionsAsync();
             var paginatedResult = result.Skip(CalculatePagination(page)).Take(LimitPerPage);
             return paginatedResult;
 
@@ -55,7 +56,7 @@ namespace ExamNest.Repositories
             if (question == null)
                 throw new ResourceNotFoundException("Question not found");
 
-            var choices = await appDBContextProcedures.GetChoicesByQuestionAsync(id);
+            var choices = await AppDbContextProcedures.GetChoicesByQuestionAsync(id);
 
 
             var result = new QuestionWithChoicesDTO
@@ -77,7 +78,7 @@ namespace ExamNest.Repositories
 
         public async Task<GetQuestionByIDResult?> GetQuestionById(int id)
         {
-            var result = await appDBContextProcedures.GetQuestionByIDAsync(id);
+            var result = await AppDbContextProcedures.GetQuestionByIDAsync(id);
             return result.FirstOrDefault();
         }
 
@@ -89,7 +90,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Course not found");
             }
-            var result = await appDBContextProcedures.UpdateQuestionAsync(id, question.CourseId, question.QuestionText, question.QuestionType, question.ModelAnswer, question.Points);
+            var result = await AppDbContextProcedures.UpdateQuestionAsync(id, question.CourseId, question.QuestionText, question.QuestionType, question.ModelAnswer, question.Points);
 
 
 

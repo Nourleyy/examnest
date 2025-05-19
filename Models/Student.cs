@@ -13,7 +13,7 @@ public partial class Student
 
     public int TrackId { get; set; }
 
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     public virtual Branch Branch { get; set; }
 
