@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace ExamNest.DTO
+namespace ExamNest.DTO.Question
 {
     public class ChoiceDTO
     {

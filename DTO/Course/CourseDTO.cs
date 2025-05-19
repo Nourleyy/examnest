@@ -1,16 +1,16 @@
 ﻿using FluentValidation;
 
-namespace ExamNest.DTO
+namespace ExamNest.DTO.Course
 {
     public class CourseDTO
     {
         public int TrackId { get; set; }
 
         public string CourseName { get; set; }
-    }     
+    }
     public class CourseDTOValidator : AbstractValidator<CourseDTO>
     {
-       public CourseDTOValidator()
+        public CourseDTOValidator()
         {
             RuleFor(c => c.CourseName)
                 .NotEmpty().WithMessage("Course name is required.")
@@ -21,5 +21,5 @@ namespace ExamNest.DTO
                   .GreaterThan(0).WithMessage("Track Id must be greater than 0.");
         }
     }
-    
+
 }

@@ -1,24 +1,22 @@
 ﻿using FluentValidation;
 
-namespace ExamNest.DTO
+namespace ExamNest.DTO.Exam
 {
-    public class ExamDTO
+    public class ExamCreatePayload
     {
-        public int ExamId { get; set; }
         public int CourseId { get; set; }
-        public string CourseName { get; set; }
         public int NoOfQuestions { get; set; }
         public DateTime ExamDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime EndDate { get; set; } = DateTime.Now.AddHours(1);
     }
 
-    public class ExamDTOValidator : AbstractValidator<ExamDTO>
+    public class ExamCreatePayloadValidator : AbstractValidator<ExamCreatePayload>
     {
-        public ExamDTOValidator()
+        public ExamCreatePayloadValidator()
         {
-            RuleFor(e => e.ExamId)
+            RuleFor(n => n.NoOfQuestions)
                 .NotEmpty()
-                .GreaterThan(0).WithMessage("Exam Id must be grater than zero.");
+                .GreaterThan(0).WithMessage("Number of Questions must be grater than zero.");
 
             RuleFor(e => e.CourseId)
                 .NotEmpty()
@@ -30,8 +28,8 @@ namespace ExamNest.DTO
 
             RuleFor(e => e.EndDate)
                 .NotEmpty().WithMessage("End Date is required.")
-                .GreaterThan(e => e.ExamDate).WithMessage("End Date must be greater than to Exam Date.");
-
+                .GreaterThan(e => e.ExamDate).WithMessage("End Date must be greater than or equal to Exam Date.")
+                .GreaterThanOrEqualTo(_ => DateTime.Now).WithMessage("End Date cannot be in the past.");
 
         }
     }

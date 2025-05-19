@@ -5,9 +5,10 @@
     {
         Admin,
         Instructor,
-        Student
+        Student,
+        Pending
     }
-     static class Permissions
+    static class Permissions
     {
         public const string AddBranch = "Permissions.AddBranch";
         public const string UpdateBranch = "Permissions.UpdateBranch";

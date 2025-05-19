@@ -1,4 +1,4 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Authentication;
 using ExamNest.Interfaces;
 using ExamNest.Models;
 
@@ -6,10 +6,11 @@ namespace ExamNest.Repositories
 {
 
 
-    public interface IInstructorRepository : IGeneric<UserDTO>
+    public interface IInstructorRepository : IGeneric<Instructor>
     {
-        Task<IEnumerable<UserViewDTO>> GetAll(int page);
+        Task<IEnumerable<InstructorViewDto>> GetAll(int page);
         Task<GetInstructorByIDResult?> GetById(int id);
+        Task<InstructorViewDto?> GetInstructorByUserId(string userId);
     }
 
 

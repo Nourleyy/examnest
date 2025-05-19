@@ -1,5 +1,7 @@
-﻿using ExamNest.DTO;
+﻿using AutoMapper;
+using ExamNest.DTO.Student;
 using ExamNest.Enums;
+using ExamNest.Models;
 using ExamNest.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +15,12 @@ namespace ExamNest.Controllers
     public class InstructorsController : ControllerBase
     {
         public readonly IInstructorRepository InstructorRepository;
+        private readonly IMapper mapper;
 
-        public InstructorsController(IInstructorRepository _instructorRepository)
+        public InstructorsController(IInstructorRepository _instructorRepository, IMapper mapper)
         {
             InstructorRepository = _instructorRepository;
+            this.mapper = mapper;
         }
 
         [HttpGet]
@@ -41,20 +45,16 @@ namespace ExamNest.Controllers
             return Ok(instructor);
         }
 
-        [HttpPost]
-        [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
-        public async Task<IActionResult> InsertInstructor(UserDTO instructor)
-        {
-
-            var result = await InstructorRepository.Create(instructor);
-
-            return RedirectToAction(nameof(GetById), new { id = result });
-
-        }
         [HttpPut]
         [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
-        public async Task<IActionResult> UpdateInstructor(UserDTO instructor, int id)
+        public async Task<IActionResult> UpdateInstructor(UpdateDto instructorPayload, int id)
         {
+            var isExisted = await InstructorRepository.GetById(id);
+            if (isExisted == null)
+            {
+                return NotFound("No Instructor with this ID");
+            }
+            var instructor = mapper.Map<Instructor>(instructorPayload);
             var updated = await InstructorRepository.Update(id, instructor);
 
             return Ok(instructor);

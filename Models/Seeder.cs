@@ -60,7 +60,7 @@ namespace ExamNest.Models
 
         private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
         {
-            string[] roles = { "Admin", "Instructor", "Student" };
+            string[] roles = { "Admin", "Instructor", "Student", "Guest" };
 
             foreach (var role in roles)
             {

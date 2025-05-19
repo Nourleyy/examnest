@@ -1,4 +1,4 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Track;
 using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
@@ -14,7 +14,7 @@ namespace ExamNest.Repositories
 
         public async Task<IEnumerable<GetAllBranchesResult>> GetAll(int page)
         {
-            var pages = await appDBContextProcedures.GetAllBranchesAsync();
+            var pages = await AppDbContextProcedures.GetAllBranchesAsync();
 
             var paginatedResult = pages.Skip(CalculatePagination(page)).Take(LimitPerPage);
 
@@ -23,7 +23,7 @@ namespace ExamNest.Repositories
         }
         public async Task<GetBranchByIDResult?> GetById(int id)
         {
-            var branchList = await appDBContextProcedures.GetBranchByIDAsync(id);
+            var branchList = await AppDbContextProcedures.GetBranchByIDAsync(id);
 
             return branchList.FirstOrDefault();
 
@@ -39,7 +39,7 @@ namespace ExamNest.Repositories
                 throw new ResourceNotFoundException("Branch not found to be deleted");
             }
 
-            var resultList = await appDBContextProcedures.DeleteBranchAsync(id);
+            var resultList = await AppDbContextProcedures.DeleteBranchAsync(id);
 
 
             return resultList.FirstOrDefault()?.RowsDeleted > 0;
@@ -49,7 +49,7 @@ namespace ExamNest.Repositories
 
         public async Task<decimal?> Create(BranchDTO branchDto)
         {
-            var result = await appDBContextProcedures.CreateBranchAsync(branchDto.BranchName);
+            var result = await AppDbContextProcedures.CreateBranchAsync(branchDto.BranchName);
 
 
 
@@ -66,7 +66,7 @@ namespace ExamNest.Repositories
                 throw new ResourceNotFoundException("Branch not found to be updated");
             }
 
-            var updated = await appDBContextProcedures.UpdateBranchAsync(id, branchDto.BranchName);
+            var updated = await AppDbContextProcedures.UpdateBranchAsync(id, branchDto.BranchName);
 
 
 

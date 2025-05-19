@@ -1,4 +1,4 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Course;
 using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
@@ -16,14 +16,14 @@ namespace ExamNest.Repositories
 
         public async Task<IEnumerable<GetAllCoursesResult>> GetAll(int page)
         {
-            var results = await appDBContextProcedures.GetAllCoursesAsync();
+            var results = await AppDbContextProcedures.GetAllCoursesAsync();
             var paginatedResults = results.Skip(CalculatePagination(page)).Take(LimitPerPage);
             return paginatedResults;
         }
 
         public async Task<GetCourseByIDResult?> GetById(int id)
         {
-            var result = await appDBContextProcedures.GetCourseByIDAsync(id);
+            var result = await AppDbContextProcedures.GetCourseByIDAsync(id);
 
 
             return result.FirstOrDefault();
@@ -46,7 +46,7 @@ namespace ExamNest.Repositories
 
 
 
-            var result = await appDBContextProcedures.UpdateCourseAsync(id, course.TrackId, course.CourseName);
+            var result = await AppDbContextProcedures.UpdateCourseAsync(id, course.TrackId, course.CourseName);
 
             return result.FirstOrDefault()?.RowsUpdated > 0 ? id : null;
         }
@@ -58,7 +58,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Provided track ID is not found");
             }
-            var result = await appDBContextProcedures.CreateCourseAsync(course.TrackId, course.CourseName);
+            var result = await AppDbContextProcedures.CreateCourseAsync(course.TrackId, course.CourseName);
             return result.FirstOrDefault()?.CourseID;
         }
 
@@ -69,7 +69,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Course not found to be deleted");
             }
-            var result = await appDBContextProcedures.DeleteCourseAsync(id);
+            var result = await AppDbContextProcedures.DeleteCourseAsync(id);
             return result.FirstOrDefault()?.RowsDeleted > 0;
 
 

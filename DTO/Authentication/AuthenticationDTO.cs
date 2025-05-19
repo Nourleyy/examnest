@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace ExamNest.DTO
+namespace ExamNest.DTO.Authentication
 {
     public class AuthenticationDTO
     {
-        public string Email { get; set; } 
+        public string Email { get; set; }
         public string Password { get; set; }
     }
     public class AuthenticationDTOValidation : AbstractValidator<AuthenticationDTO>

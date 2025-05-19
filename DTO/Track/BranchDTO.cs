@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace ExamNest.DTO
+namespace ExamNest.DTO.Track
 {
     public class BranchDTO
     {

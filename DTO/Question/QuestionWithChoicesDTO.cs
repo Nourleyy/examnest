@@ -1,4 +1,4 @@
-﻿namespace ExamNest.DTO
+﻿namespace ExamNest.DTO.Question
 {
     public class QuestionWithChoicesDTO
     {

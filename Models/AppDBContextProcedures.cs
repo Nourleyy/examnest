@@ -214,7 +214,7 @@ namespace ExamNest.Models
             return _;
         }
 
-        public virtual async Task<List<CreateInstructorResult>> CreateInstructorAsync(int? branchID, int? trackID, int? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<CreateInstructorResult>> CreateInstructorAsync(int? branchID, int? trackID, string userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -241,7 +241,7 @@ namespace ExamNest.Models
                 {
                     ParameterName = "UserID",
                     Value = userID ?? Convert.DBNull,
-                    SqlDbType = System.Data.SqlDbType.Int,
+                    SqlDbType = System.Data.SqlDbType.VarChar,
                 },
                 parameterreturnValue,
             };
@@ -1335,7 +1335,7 @@ namespace ExamNest.Models
             return _;
         }
 
-        public virtual async Task<List<UpdateInstructorResult>> UpdateInstructorAsync(int? instructorID, int? branchID, int? trackID, int? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<UpdateInstructorResult>> UpdateInstructorAsync(int? instructorID, int? branchID, int? trackID, string userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {
@@ -1438,7 +1438,7 @@ namespace ExamNest.Models
             return _;
         }
 
-        public virtual async Task<List<UpdateStudentResult>> UpdateStudentAsync(int? studentID, int? branchID, int? trackID, int? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        public virtual async Task<List<UpdateStudentResult>> UpdateStudentAsync(int? studentID, int? branchID, int? trackID, string userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
         {
             var parameterreturnValue = new SqlParameter
             {

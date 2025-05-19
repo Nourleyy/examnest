@@ -1,4 +1,4 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Question;
 using ExamNest.Errors;
 using ExamNest.Interfaces;
 using ExamNest.Models;
@@ -15,7 +15,7 @@ namespace ExamNest.Repositories
         }
         public async Task<GetChoiceByIDResult?> GetById(int id)
         {
-            var ChoiceList = await appDBContextProcedures.GetChoiceByIDAsync(id);
+            var ChoiceList = await AppDbContextProcedures.GetChoiceByIDAsync(id);
 
             return ChoiceList.FirstOrDefault();
         }
@@ -26,7 +26,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Question not found to create a choice for it!");
             }
-            var created = await appDBContextProcedures.CreateChoiceAsync(choice.QuestionId, choice.ChoiceLetter, choice.ChoiceText);
+            var created = await AppDbContextProcedures.CreateChoiceAsync(choice.QuestionId, choice.ChoiceLetter, choice.ChoiceText);
 
             return created.FirstOrDefault()?.ChoiceID;
         }
@@ -46,7 +46,7 @@ namespace ExamNest.Repositories
                 throw new ResourceNotFoundException("No Choice Found to be Updated!");
 
             }
-            var updated = await appDBContextProcedures.UpdateChoiceAsync(id, choice.ChoiceLetter, choice.ChoiceText);
+            var updated = await AppDbContextProcedures.UpdateChoiceAsync(id, choice.ChoiceLetter, choice.ChoiceText);
             return updated.FirstOrDefault()?.RowsUpdated > 0 ? id : null;
         }
 
@@ -57,7 +57,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Choice not found to be deleted");
             }
-            var deleted = await appDBContextProcedures.DeleteChoiceAsync(id);
+            var deleted = await AppDbContextProcedures.DeleteChoiceAsync(id);
 
             return deleted.FirstOrDefault()?.RowsDeleted > 0;
         }

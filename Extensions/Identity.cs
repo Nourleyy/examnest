@@ -1,5 +1,4 @@
-﻿using ExamNest.Enums;
-using ExamNest.Models;
+﻿using ExamNest.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
@@ -26,17 +25,7 @@ namespace ExamNest.Extensions
         }
         public static IServiceCollection AddIdentity(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddIdentity<User, IdentityRole>(options =>
-                    {
-                        options.User.RequireUniqueEmail = true;
-                        options.Password.RequireDigit = true;
-                        options.Password.RequiredLength = 6;
-                        options.Password.RequireNonAlphanumeric = true;
-                        options.Password.RequireUppercase = true;
-                        options.Password.RequireLowercase = true;
-                        options.SignIn.RequireConfirmedAccount = false;
-                        options.SignIn.RequireConfirmedEmail = false;
-                    })
+            services.AddIdentity<User, IdentityRole>(UserCreateRequirements)
                     .AddEntityFrameworkStores<AppDBContext>()
                     .AddDefaultTokenProviders();
 
@@ -49,9 +38,21 @@ namespace ExamNest.Extensions
                     {
                         options.TokenValidationParameters = GetTokenValidationParameters(configuration);
                     });
-        
+
 
             return services;
+        }
+
+        private static void UserCreateRequirements(IdentityOptions options)
+        {
+            options.User.RequireUniqueEmail = true;
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 6;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = true;
+            options.SignIn.RequireConfirmedAccount = false;
+            options.SignIn.RequireConfirmedEmail = false;
         }
     }
 

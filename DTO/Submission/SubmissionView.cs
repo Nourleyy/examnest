@@ -1,8 +1,6 @@
-﻿using FluentValidation;
-
-namespace ExamNest.DTO
+﻿namespace ExamNest.DTO.Submission
 {
-    public class SubmissionDTO
+    public class SubmissionView
     {
         public int ExamId { get; set; }
         public int StudentId { get; set; }
@@ -11,5 +9,5 @@ namespace ExamNest.DTO
         public DateTime SubmissionDate { get; set; }
         public decimal? Score { get; set; }
     }
-    
+
 }

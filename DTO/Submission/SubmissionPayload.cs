@@ -1,14 +1,15 @@
-﻿using FluentValidation;
+﻿using ExamNest.DTO.Exam;
+using FluentValidation;
 
-namespace ExamNest.DTO
+namespace ExamNest.DTO.Submission
 {
-    public class SubmissionInputDTO
+    public class SubmissionPayload
     {
         public int ExamID { get; set; }
         public int StudentID { get; set; }
         public List<ExamAnswerDTO>? Answers { get; set; }
     }
-    public class SubmissionInputDTOValidator : AbstractValidator<SubmissionInputDTO>
+    public class SubmissionInputDTOValidator : AbstractValidator<SubmissionPayload>
     {
         public SubmissionInputDTOValidator()
         {
@@ -18,8 +19,8 @@ namespace ExamNest.DTO
             RuleFor(s => s.StudentID)
                   .NotEmpty().WithMessage("Student ID is required.")
                   .GreaterThan(0).WithMessage("Student ID must be greater than 0.");
-         
+
         }
     }
- 
+
 }

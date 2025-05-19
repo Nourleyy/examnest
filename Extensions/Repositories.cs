@@ -16,6 +16,7 @@ namespace ExamNest.Extensions
             services.AddScoped<ISubmissionRepository, SubmissionRepository>();
             services.AddScoped<IQuestionRepository, QuestionRepository>();
             services.AddScoped<IStudentRepository, StudentRepository>();
+            services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
             return services;
         }
     }

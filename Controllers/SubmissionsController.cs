@@ -1,10 +1,11 @@
-﻿using System.Security.Claims;
-using AutoMapper;
-using ExamNest.DTO;
+﻿using AutoMapper;
+using ExamNest.DTO.Exam;
+using ExamNest.DTO.Submission;
 using ExamNest.Enums;
 using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ExamNest.Controllers
 {
@@ -38,27 +39,27 @@ namespace ExamNest.Controllers
 
         public async Task<IActionResult> GetById(int id)
         {
-            
+
             var submission = await submissionRepository.GetById(id);
 
-            
+
 
             if (submission == null)
             {
                 return NotFound("No Submission Found with this ID");
             }
 
-          
+
+
+
+            if (!User.IsInRole(nameof(Roles.Student))) return Ok(mapper.Map<ExamSubmissionView>(submission));
+            var userId = submission.Student.UserId;
 
             var currentUser = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-            if (User.IsInRole(nameof(Roles.Student)))
+            if (userId != currentUser)
             {
-                var studentId = submission.StudentId;
-                if (studentId.ToString() != currentUser)
-                {
-                    return Unauthorized("You are not allowed to access this submission");
-                }
+                return Unauthorized("You are not allowed to access this submission");
             }
 
 
@@ -79,7 +80,7 @@ namespace ExamNest.Controllers
         [HttpPost]
         [Authorize(Roles = $"{nameof(Roles.Student)}")]
 
-        public async Task<IActionResult> InsertSubmission(SubmissionInputDTO request)
+        public async Task<IActionResult> InsertSubmission(SubmissionPayload request)
         {
 
             // TODO: After Identity We will extract the userId from the token

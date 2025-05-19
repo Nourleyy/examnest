@@ -1,4 +1,4 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Course;
 using ExamNest.Enums;
 using ExamNest.Interfaces;
 using Microsoft.AspNetCore.Authorization;

@@ -1,51 +1,24 @@
-﻿using ExamNest.Interfaces;
+﻿using AutoMapper;
+using ExamNest.DTO.Authentication;
+using ExamNest.Interfaces;
 using ExamNest.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExamNest.Repositories
 {
-    public interface IStudentRepository : IGeneric<Student>
-    {
-        Task<StudentView?> GetUserById(string currentUser);
-    }
-   public class StudentView
-    {
-        public string UserId { get; set; }
-        public string Name { get; set; }
-        public string Email { get; set; }
-        public string TrackName { get; set; }
-        public string BranchName { get; set; }
-        public int StudentId { get; set; }
-    }
     public class StudentRepository : GenericRepository, IStudentRepository
     {
-        public StudentRepository(AppDBContext appDB) : base(appDB)
+        private readonly IMapper mapper;
+        public StudentRepository(AppDBContext appDB, IMapper mapper) : base(appDB)
         {
+            this.mapper = mapper;
         }
 
-        public async Task<StudentView?> GetUserById(string currentUser)
-        {
-            var user = await _appDBContext.Students
-                .Include(u => u.User)
-                .Include(u => u.Track)
-                .Include(u => u.Branch)
-                    .Select(u => new StudentView
-                    {
-                        UserId = u.UserId,
-                        Name = u.User.Name,
-                        Email = u.User.Email,
-                        TrackName = u.Track.TrackName,
-                        BranchName = u.Branch.BranchName,
-                        StudentId = u.StudentId
-                    })
-                .FirstOrDefaultAsync(u => u.UserId == currentUser);
 
-            return user;
-        }
 
         public async Task<decimal?> Create(Student entityDto)
         {
-            var createdStudentResult = await appDBContextProcedures.CreateStudentAsync(entityDto.BranchId,entityDto.TrackId,entityDto.UserId);
+            var createdStudentResult = await AppDbContextProcedures.CreateStudentAsync(entityDto.BranchId, entityDto.TrackId, entityDto.UserId);
             if (createdStudentResult.FirstOrDefault() == null)
             {
                 throw new InvalidOperationException("Student not created");
@@ -53,14 +26,50 @@ namespace ExamNest.Repositories
             return createdStudentResult.FirstOrDefault()?.StudentID;
         }
 
-        public Task<bool> Delete(int id)
+        public async Task<bool> Delete(int id)
         {
-            throw new NotImplementedException();
+
+
+            var deleteById = await AppDbContext.Students.Where(s => s.StudentId == id).ExecuteDeleteAsync();
+            return deleteById > 0;
         }
 
-        public Task<int?> Update(int id, Student entity)
+        public async Task<List<StudentViewDto>> GetAll(int page)
         {
-            throw new NotImplementedException();
+            var students = await AppDbContext.Students
+                                   .Include(t => t.Track)
+                                   .Include(b => b.Branch)
+                                   .Include(u => u.User)
+                                   .Take(LimitPerPage)
+                                      .Skip(CalculatePagination(page))
+                                   .ToListAsync();
+
+            return mapper.Map<List<StudentViewDto>>(students);
+
+        }
+
+        public async Task<StudentViewDto> GetById(int id)
+        {
+            var student = await AppDbContext.Students.FirstOrDefaultAsync(s => s.StudentId == id);
+
+            return mapper.Map<StudentViewDto>(student);
+        }
+
+        public async Task<StudentViewDto?> GetStudentByUserId(string userId)
+        {
+            var result = await AppDbContext.Students.FirstOrDefaultAsync(s => s.UserId == userId);
+
+            return result == null ? null : mapper.Map<StudentViewDto>(result);
+        }
+
+        public async Task<int?> Update(int id, Student entity)
+        {
+            var result = await AppDbContextProcedures.UpdateStudentAsync(entity.StudentId, entity.BranchId, entity.TrackId, entity.UserId);
+            if (result.FirstOrDefault() == null)
+            {
+                throw new InvalidOperationException("Student not updated");
+            }
+            return result.FirstOrDefault()?.RowsUpdated;
         }
     }
 }

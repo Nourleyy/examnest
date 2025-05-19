@@ -1,40 +1,78 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using ExamNest.Extensions;
+using ExamNest.Interfaces;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace ExamNest.Services
 {
-    public class TokenManagementService
+    public class TokenManagementService : ITokenManagementService
     {
         private readonly IConfiguration configuration;
+        private readonly JwtSecurityTokenHandler jwtSecurityTokenHandler = new();
 
         public TokenManagementService(IConfiguration _configuration)
         {
             configuration = _configuration;
         }
-
-        public string GenerateToken(IEnumerable<Claim> claims)
+        private SecurityTokenDescriptor TokenDescriptor(DateTime expiresIn, IEnumerable<Claim> claims = null)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            // Create a symmetric security key using the secret key from the configuration.
             var authSigningKey = new SymmetricSecurityKey
                 (Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
 
-            var tokenDescriptor = new SecurityTokenDescriptor
+            return new SecurityTokenDescriptor
             {
                 Issuer = configuration["Jwt:Issuer"],
                 Audience = configuration["Jwt:Audience"],
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddMinutes(15),
+                Expires = expiresIn,
                 SigningCredentials = new SigningCredentials
-                                          (authSigningKey, SecurityAlgorithms.HmacSha256)
+                           (authSigningKey, SecurityAlgorithms.HmacSha256)
             };
+        }
+        public string GenerateToken(IEnumerable<Claim> claims)
+        {
+            var tokenDescriptor = TokenDescriptor(DateTime.Now.AddSeconds(30), claims);
+            var token = jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
+            return jwtSecurityTokenHandler.WriteToken(token);
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return tokenHandler.WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var tokenDescriptor = TokenDescriptor(DateTime.Now.AddHours(1));
+
+            var token = jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
+
+
+
+            return jwtSecurityTokenHandler.WriteToken(token);
+
+
+        }
+        public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        {
+            var tokenValidationParameters = Identity.GetTokenValidationParameters(configuration);
+            tokenValidationParameters.ValidateLifetime = false; // here we are saying that we don't care about the token's expiration date
+            var principal = jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
+            return principal;
+        }
+        public bool ValidateToken(string token)
+        {
+
+
+            try
+            {
+                jwtSecurityTokenHandler.ValidateToken(token, Identity.GetTokenValidationParameters(configuration), out SecurityToken validatedToken);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
         }
     }
 }

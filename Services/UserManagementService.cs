@@ -1,117 +1,188 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+﻿using ExamNest.DTO.Authentication;
 using ExamNest.Enums;
 using ExamNest.Errors;
+using ExamNest.Interfaces;
 using ExamNest.Models;
+using ExamNest.Repositories;
 using Microsoft.AspNetCore.Identity;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace ExamNest.Services
 {
 
 
-    public class UserManagementService
+
+    public class UserManagementService : IUserManagement
     {
-        private readonly UserManager<User> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
-        private readonly TokenManagementService tokenManagementService;
-        public UserManagementService(UserManager<User> _userManager,
-            RoleManager<IdentityRole> _roleManager, TokenManagementService _tokenManagementService)
+        private readonly UserManager<User> _userManager;
+        private readonly ITokenManagementService _tokenManagementService;
+        private readonly ITrackRepository _trackRepository;
+
+        public UserManagementService(UserManager<User> userManager,
+                                     ITokenManagementService tokenManagementService,
+                                     ITrackRepository trackRepository)
         {
-            userManager = _userManager;
-            roleManager = _roleManager;
-            tokenManagementService = _tokenManagementService;
+            this._userManager = userManager;
+            this._tokenManagementService = tokenManagementService;
+            this._trackRepository = trackRepository;
         }
 
-        public async Task<string> SignInWithEmail(string email, string password)
+        public async Task<Tokens> SignInWithEmail(string email, string password)
         {
-            var user = await userManager.FindByEmailAsync(email);
+
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
                 throw new UnauthorizedAccessException("Email or Password is not correct.");
             }
-            var result = await userManager.CheckPasswordAsync(user, password);
+
+            var result = await _userManager.CheckPasswordAsync(user, password);
             if (!result)
             {
                 throw new UnauthorizedAccessException("Email or Password is not correct.");
             }
-            var roles = await userManager.GetRolesAsync(user);
+
+            var roles = await _userManager.GetRolesAsync(user);
             if (roles == null || roles.Count == 0)
             {
                 throw new UnauthorizedAccessException("User has no roles assigned.");
             }
 
-            var token = tokenManagementService.GenerateToken(await GetClaims(user));
-            return token;
+            return await GenerateTokensAsync(user);
         }
 
-        public async Task<string> RegisterUser(string name, string email, string password)
+        private async Task<Tokens> GenerateTokensAsync(User user)
+        {
+            var token = _tokenManagementService.GenerateToken(await GetClaims(user));
+            var refreshToken = _tokenManagementService.GenerateRefreshToken();
+
+            var tokens = new Tokens()
+            {
+                AccessToken = token,
+                RefreshToken = refreshToken
+            };
+
+            return tokens;
+        }
+
+        public async Task<Tokens> RegisterUser(string name, string email, string password)
         {
             var username = UsernameGenerator.UsernameGenerator.GenerateUsername();
-            var user = new User { Email = email, UserName = username , Name = name};
-            var result = await userManager.CreateAsync(user, password);
+            var user = new User { Email = email, UserName = username, Name = name };
+            var result = await _userManager.CreateAsync(user, password);
             if (!result.Succeeded)
             {
-               throw new UserCreationErrorException(result.Errors);
+                throw new UserCreationErrorException(result.Errors);
             }
 
-            if (!await IsUserInRole(user, Roles.Student))
+            if (!await IsUserInRole(user, Roles.Pending))
             {
-               var roleAssginment = await AssignRoleToUser(user, Roles.Student);
-                if (!roleAssginment)
+                var roleAssignment = await AssignRoleToUser(user, Roles.Pending);
+                if (!roleAssignment)
                 {
                     throw new UserCreationErrorException("User role assignment failed.");
                 }
             }
-           var token = tokenManagementService.GenerateToken(await GetClaims(user));
-            return token;
+
+            return await GenerateTokensAsync(user);
+
         }
 
-        private async Task<bool> IsUserInRole(User user, Roles role)
+        public async Task<bool> IsUserInRole(User user, Roles role)
         {
-            var isInRole = await userManager.IsInRoleAsync(user, role.ToString());
+            var isInRole = await _userManager.IsInRoleAsync(user, role.ToString());
             return isInRole;
         }
 
-        private async Task<bool> AssignRoleToUser(User user, Roles role)
+        public async Task<bool> AssignRoleToUser(User user, Roles role)
         {
-            var result = await userManager.AddToRoleAsync(user, role.ToString());
-            
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            if (roles.Count > 0)
+            {
+                // Drop the pervious role
+                await _userManager.RemoveFromRolesAsync(user, roles);
+            }
+
+            var result = await _userManager.AddToRoleAsync(user, role.ToString());
+
 
             return result.Succeeded;
         }
 
         private async Task<List<Claim>> GetClaims(User user)
         {
-            var roles = await userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
             var roleString = roles.FirstOrDefault() ?? string.Empty;
-            var role = Enum.TryParse<Roles>(roleString, out var parsedRole) ? parsedRole : Roles.Student;
 
-            IReadOnlyList<string> permissions = role switch
-            {
-                Roles.Admin => RolePermissions.Admin,
-                Roles.Instructor => RolePermissions.Instructor,
-                Roles.Student => RolePermissions.Student,
-                _ => new List<string>()
-            };
 
             var claims = new List<Claim>
-                {
-                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, roleString)
-                };
+                         {
+                             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                             new Claim(ClaimTypes.Name, user.UserName),
+                             new Claim(ClaimTypes.NameIdentifier, user.Id),
+                             new Claim(ClaimTypes.Email, user.Email),
+                             new Claim(ClaimTypes.Role, roleString)
+                         };
 
-            foreach (var permission in permissions)
-            {
-                claims.Add(new Claim("Permission", permission));
-            }
 
             return claims;
         }
 
+        public async Task<User?> IsUserExistById(string id)
+        {
+            return await _userManager.FindByIdAsync(id);
+        }
 
+        public async Task<bool> UpgradeUser(UpgradeDTO upgradePayloadDto)
+        {
+            var user = await _userManager.FindByIdAsync(upgradePayloadDto.UserId);
+
+            if (user == null)
+                throw new ResourceNotFoundException("User Not Found");
+
+            if (!await IsUserInRole(user, Roles.Pending))
+                throw new InvalidOperationException("Can't regjsgen the role to the user");
+
+            var track = await _trackRepository.GetById(upgradePayloadDto.TrackId);
+
+            if (track == null || (track.BranchID != upgradePayloadDto.BranchId))
+            {
+                throw new ResourceNotFoundException("Track or Branch not found");
+            }
+
+            await AssignRoleToUser(user, upgradePayloadDto.Type);
+
+            return true;
+        }
+
+        public Tokens RefreshToken(string refreshToken, string accessToken)
+        {
+
+            var isValid = _tokenManagementService.ValidateToken(refreshToken);
+
+            if (!isValid)
+            {
+                throw new UnauthorizedAccessException("Invalid token");
+            }
+
+
+            var userClaims = _tokenManagementService.GetPrincipalFromExpiredToken(accessToken);
+
+            var newAccessToken = _tokenManagementService.GenerateToken(userClaims.Claims);
+
+            var newRefreshToken = _tokenManagementService.GenerateRefreshToken();
+
+            var tokens = new Tokens()
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken
+            };
+            return tokens;
+
+        }
 
     }
 }

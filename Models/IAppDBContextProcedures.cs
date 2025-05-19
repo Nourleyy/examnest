@@ -18,7 +18,7 @@ namespace ExamNest.Models
         Task<List<CreateChoiceResult>> CreateChoiceAsync(int? questionID, string choiceLetter, string choiceText, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateCourseResult>> CreateCourseAsync(int? trackID, string courseName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateExamAndGetIdResult>> CreateExamAndGetIdAsync(int? courseID, int? numberOfQuestions, DateTime? examDate, DateTime? endDate, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
-        Task<List<CreateInstructorResult>> CreateInstructorAsync(int? branchID, int? trackID, int? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
+        Task<List<CreateInstructorResult>> CreateInstructorAsync(int? branchID, int? trackID, string? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateQuestionResult>> CreateQuestionAsync(int? courseID, string questionText, string questionType, string modelAnswer, int? points, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateStudentResult>> CreateStudentAsync(int? branchID, int? trackID, string userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<CreateTrackResult>> CreateTrackAsync(int? branchID, string trackName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
@@ -58,9 +58,9 @@ namespace ExamNest.Models
         Task<List<UpdateBranchResult>> UpdateBranchAsync(int? branchID, string branchName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<UpdateChoiceResult>> UpdateChoiceAsync(int? choiceID, string choiceLetter, string choiceText, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<UpdateCourseResult>> UpdateCourseAsync(int? courseID, int? trackID, string courseName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
-        Task<List<UpdateInstructorResult>> UpdateInstructorAsync(int? instructorID, int? branchID, int? trackID, int? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
+        Task<List<UpdateInstructorResult>> UpdateInstructorAsync(int? instructorID, int? branchID, int? trackID, string? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<UpdateQuestionResult>> UpdateQuestionAsync(int? questionID, int? courseID, string questionText, string questionType, string modelAnswer, int? points, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
-        Task<List<UpdateStudentResult>> UpdateStudentAsync(int? studentID, int? branchID, int? trackID, int? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
+        Task<List<UpdateStudentResult>> UpdateStudentAsync(int? studentID, int? branchID, int? trackID, string? userID, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<UpdateTrackResult>> UpdateTrackAsync(int? trackID, int? branchID, string trackName, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace ExamNest.DTO
+namespace ExamNest.DTO.Authentication
 {
     public class RegisterDTO : AuthenticationDTO
     {
@@ -14,7 +14,9 @@ namespace ExamNest.DTO
             Include(new AuthenticationDTOValidation());
 
             RuleFor(x => x.Name)
-                .NotEmpty().WithMessage("Name is required.");
+                .Matches(@"^[A-Za-z\s]*$").WithMessage("{PropertyName} should only contain letters.")
+
+                .NotEmpty().WithMessage("{PropertyName} is required.");
         }
     }
 }

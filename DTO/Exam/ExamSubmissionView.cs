@@ -1,4 +1,4 @@
-﻿namespace ExamNest.DTO
+﻿namespace ExamNest.DTO.Exam
 {
     public class ExamSubmissionView
     {

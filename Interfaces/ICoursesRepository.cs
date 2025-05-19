@@ -1,4 +1,4 @@
-﻿using ExamNest.DTO;
+﻿using ExamNest.DTO.Course;
 using ExamNest.Models;
 
 namespace ExamNest.Interfaces
