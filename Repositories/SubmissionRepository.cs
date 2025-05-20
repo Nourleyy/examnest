@@ -13,14 +13,21 @@ namespace ExamNest.Repositories
     {
         private readonly IMapper mapper;
         private readonly IExamRepository examRepository;
-        public SubmissionRepository(AppDBContext appDB, IExamRepository examRepository, IMapper _mapper) : base(appDB)
+        private readonly IStudentRepository studentRepository;
+        public SubmissionRepository(AppDBContext appDB, IExamRepository examRepository, IMapper _mapper, IStudentRepository studentRepository) : base(appDB)
         {
             mapper = _mapper;
+            this.studentRepository = studentRepository;
             this.examRepository = examRepository;
         }
 
-        public async Task<decimal?> Create(SubmissionPayload submission)
+        public async Task<decimal?> Create(SubmssionDTO submission)
         {
+            var student = await studentRepository.GetStudentByUserId(submission.UserId);
+            if (student == null)
+            {
+                throw new ResourceNotFoundException("Student not found!");
+            }
             var exam = await examRepository.GetExamById(submission.ExamID);
             if (exam == null)
             {
@@ -31,7 +38,8 @@ namespace ExamNest.Repositories
                 throw new InvalidOperationException("Cannot submit exam after the exam date ;)");
             }
             var answersJson = JsonConvert.SerializeObject(submission.Answers);
-            var result = await AppDbContextProcedures.SubmitExamAnswersAsync(submission.ExamID, submission.StudentID, answersJson);
+
+            var result = await AppDbContextProcedures.SubmitExamAnswersAsync(submission.ExamID, student.StudentId, answersJson);
 
             return result.FirstOrDefault()?.SubmissionID;
         }
@@ -44,7 +52,7 @@ namespace ExamNest.Repositories
             {
                 throw new ResourceNotFoundException("Submission Not Found To Be Deleted");
             }
-            AppDbContext.ExamSubmissions.Remove(entity); // To be replaced with the soft delete method
+            AppDbContext.ExamSubmissions.Remove(entity);
             await AppDbContext.SaveChangesAsync();
             return true;
 
@@ -75,7 +83,7 @@ namespace ExamNest.Repositories
 
         }
 
-        public async Task<int?> Update(int id, SubmissionPayload entity)
+        public async Task<int?> Update(int id, SubmssionDTO entity)
         {
             // Find the Submission by ID
             var submission = await GetById(id);

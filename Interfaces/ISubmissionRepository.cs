@@ -3,7 +3,7 @@ using ExamNest.Models;
 
 namespace ExamNest.Interfaces
 {
-    public interface ISubmissionRepository : IGeneric<SubmissionPayload>
+    public interface ISubmissionRepository : IGeneric<SubmssionDTO>
     {
         Task<IEnumerable<SubmissionView>> GetAll(int page);
         Task<ExamSubmission?> GetById(int id);
