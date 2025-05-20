@@ -83,9 +83,16 @@ namespace ExamNest.Controllers
         public async Task<IActionResult> InsertSubmission(SubmissionPayload request)
         {
 
-            // TODO: After Identity We will extract the userId from the token
+            var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var studentDto = new SubmssionDTO
+            {
+                UserId = userId,
+                ExamID = request.ExamID,
+                Answers = request.Answers
+            };
 
-            var result = await submissionRepository.Create(request);
+
+            var result = await submissionRepository.Create(studentDto);
             return RedirectToAction(nameof(GetById), new { id = result });
 
         }
