@@ -29,10 +29,19 @@ namespace ExamNest
 
             builder.Services.AddValidation();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                                  corsPolicyBuilder => corsPolicyBuilder.AllowAnyOrigin()
+                                                                        .AllowAnyMethod()
+                                                                        .AllowAnyHeader());
+            });
 
             builder.Services.AddSwagger();
 
             var app = builder.Build();
+            app.UseCors();
+
             app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
             app.UseMiddleware<TokenInjectionMiddleware>();
 
