@@ -12,7 +12,13 @@ namespace ExamNest
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                                  corsPolicyBuilder => corsPolicyBuilder.AllowAnyOrigin()
+                                                                        .AllowAnyMethod()
+                                                                        .AllowAnyHeader());
+            });
 
             builder.Services.AddControllers(options => options.Filters.Add<ApiResponseFilter>());
 
@@ -29,13 +35,6 @@ namespace ExamNest
 
             builder.Services.AddValidation();
 
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("CorsPolicy",
-                                  corsPolicyBuilder => corsPolicyBuilder.AllowAnyOrigin()
-                                                                        .AllowAnyMethod()
-                                                                        .AllowAnyHeader());
-            });
 
             builder.Services.AddSwagger();
 
