@@ -18,8 +18,9 @@ namespace ExamNest
 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddAutoMapper(typeof(Program));
-            builder.Services.AddDbContext<AppDBContext>(
-            options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddDbContext<AppDBContext>(options =>
+                                                            options.UseSqlServer(builder.Configuration
+                                                                .GetConnectionString("DefaultConnection")));
 
             builder.Services.AddRepositories();
             builder.Services.AddServices();
@@ -36,15 +37,8 @@ namespace ExamNest
             app.UseMiddleware<TokenInjectionMiddleware>();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ExamNest API V1");
-
-                });
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "ExamNest API V1"); });
 
             ServiceHelper.ServiceProvider = app.Services;
 
