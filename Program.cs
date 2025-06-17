@@ -39,7 +39,7 @@ namespace ExamNest
             builder.Services.AddSwagger();
 
             var app = builder.Build();
-            app.UseCors();
+            app.UseCors("CorsPolicy");
 
             app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
             app.UseMiddleware<TokenInjectionMiddleware>();
