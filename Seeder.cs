@@ -1,12 +1,30 @@
 ﻿using Bogus;
+using ExamNest.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace ExamNest.Models
+namespace ExamNest
 {
+    public class SeedCounts
+    {
+        public int Instructors { get; set; } = 150;
+        public int Students { get; set; } = 500;
+        public int Branches { get; set; } = 5;
+        public int TracksPerBranchMin { get; set; } = 3;
+        public int TracksPerBranchMax { get; set; } = 5;
+        public int QuestionsPerCourseMin { get; set; } = 50;
+        public int QuestionsPerCourseMax { get; set; } = 60;
+        public int ExamsPerCourseMin { get; set; } = 1;
+        public int ExamsPerCourseMax { get; set; } = 5;
+        public int ExamQuestionsMin { get; set; } = 20;
+        public int ExamQuestionsMax { get; set; } = 50;
+        public double StudentExamTakenRateMin { get; set; } = 0.7;
+        public double StudentExamTakenRateMax { get; set; } = 0.9;
+    }
+
     public static class DataSeeder
     {
-        public static async Task InitializeAsync(IServiceProvider serviceProvider)
+        public static async Task InitializeAsync(IServiceProvider serviceProvider, SeedCounts counts)
         {
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
@@ -16,22 +34,19 @@ namespace ExamNest.Models
                 var context = services.GetRequiredService<AppDBContext>();
                 var userManager = services.GetRequiredService<UserManager<User>>();
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-                await context.Database.EnsureCreatedAsync();
-                // await context.Database.MigrateAsync();
 
-                // Seed only if no users exist
+                await context.Database.MigrateAsync();
+
                 if (context.Users.Any())
                 {
                     return;
                 }
 
-                // Seed Identity roles and users
                 await SeedRolesAsync(roleManager);
-                var users = await SeedUsersAsync(userManager);
+                var users = await SeedUsersAsync(userManager, counts);
 
-                // Seed domain data, respecting relationships:
-                var branches = await SeedBranchesAsync(context);
-                var tracks = await SeedTracksAsync(context, branches);
+                var branches = await SeedBranchesAsync(context, counts);
+                var tracks = await SeedTracksAsync(context, branches, counts);
                 var courses = await SeedCoursesAsync(context, tracks);
 
                 var instructorUsers = users.Where(u => u.Item2 == "Instructor").Select(u => u.Item1).ToList();
@@ -39,14 +54,12 @@ namespace ExamNest.Models
 
                 var instructors = await SeedInstructorsAsync(context, branches, tracks, instructorUsers);
                 var students = await SeedStudentsAsync(context, branches, tracks, studentUsers);
-                var questions = await SeedQuestionBankAsync(context, courses);
-                var exams = await SeedExamsAsync(context, courses);
+                var questions = await SeedQuestionBankAsync(context, courses, counts);
+                var exams = await SeedExamsAsync(context, courses, counts);
 
-                // Seed exam questions by linking the appropriate questions to each exam.
-                await SeedExamQuestionsAsync(context, exams, questions);
+                await SeedExamQuestionsAsync(context, exams, questions, counts);
 
-                // Seed exam submissions (with students’ answers)
-                await SeedExamSubmissionsAsync(context, exams, students, questions);
+                await SeedExamSubmissionsAsync(context, exams, students, questions, counts);
 
                 await context.SaveChangesAsync();
             }
@@ -71,12 +84,12 @@ namespace ExamNest.Models
             }
         }
 
-        private static async Task<List<Tuple<User, string>>> SeedUsersAsync(UserManager<User> userManager)
+        private static async Task<List<Tuple<User, string>>> SeedUsersAsync(
+            UserManager<User> userManager, SeedCounts counts)
         {
             var result = new List<Tuple<User, string>>();
             var password = "Password123!";
 
-            // Create admin
             var admin = new User
             {
                 UserName = "admin@examnest.com",
@@ -92,7 +105,6 @@ namespace ExamNest.Models
                 result.Add(new Tuple<User, string>(admin, "Admin"));
             }
 
-            // Generate instructors (15)
             var instructorFaker = new Faker<User>()
                                   .RuleFor(u => u.UserName,
                                            f => f.Internet.Email(f.Name.FirstName(), f.Name.LastName(), "examnest.com")
@@ -102,7 +114,7 @@ namespace ExamNest.Models
                                   .RuleFor(u => u.EmailConfirmed, true)
                                   .RuleFor(u => u.PhoneNumberConfirmed, true);
 
-            var instructors = instructorFaker.Generate(15);
+            var instructors = instructorFaker.Generate(counts.Instructors);
             foreach (var instructor in instructors)
             {
                 if (await userManager.FindByEmailAsync(instructor.Email) == null)
@@ -113,7 +125,6 @@ namespace ExamNest.Models
                 }
             }
 
-            // Generate students (50)
             var studentFaker = new Faker<User>()
                                .RuleFor(u => u.UserName,
                                         f => f.Internet
@@ -124,7 +135,7 @@ namespace ExamNest.Models
                                .RuleFor(u => u.EmailConfirmed, true)
                                .RuleFor(u => u.PhoneNumberConfirmed, true);
 
-            var students = studentFaker.Generate(50);
+            var students = studentFaker.Generate(counts.Students);
             foreach (var student in students)
             {
                 if (await userManager.FindByEmailAsync(student.Email) == null)
@@ -138,12 +149,12 @@ namespace ExamNest.Models
             return result;
         }
 
-        private static async Task<List<Branch>> SeedBranchesAsync(AppDBContext context)
+        private static async Task<List<Branch>> SeedBranchesAsync(AppDBContext context, SeedCounts counts)
         {
             var branchNames = new[] { "Cairo", "Alexandria", "Giza", "Aswan", "Luxor" };
             var branches = new List<Branch>();
 
-            foreach (var name in branchNames)
+            foreach (var name in branchNames.Take(counts.Branches))
             {
                 var branch = new Branch { BranchName = name };
                 context.Branches.Add(branch);
@@ -154,7 +165,8 @@ namespace ExamNest.Models
             return branches;
         }
 
-        private static async Task<List<Track>> SeedTracksAsync(AppDBContext context, List<Branch> branches)
+        private static async Task<List<Track>> SeedTracksAsync(AppDBContext context, List<Branch> branches,
+                                                               SeedCounts counts)
         {
             var trackNames = new[]
                              {
@@ -167,8 +179,7 @@ namespace ExamNest.Models
 
             foreach (var branch in branches)
             {
-                // Each branch gets 3–5 random tracks.
-                int count = faker.Random.Int(3, 5);
+                int count = faker.Random.Int(counts.TracksPerBranchMin, counts.TracksPerBranchMax);
                 var selected = faker.Random.Shuffle(trackNames).Take(count);
                 foreach (var name in selected)
                 {
@@ -190,11 +201,12 @@ namespace ExamNest.Models
         {
             var coursesByTrack = new Dictionary<string, string[]>
             {
-                ["Software Engineering"] = new[]
-                                                                {
-                                                                    "OOP", "Design Patterns", "Software Testing",
-                                                                    "Agile Development", "Project Management"
-                                                                },
+                ["Software Engineering"] =
+                                         new[]
+                                         {
+                                             "OOP", "Design Patterns", "Software Testing", "Agile Development",
+                                             "Project Management"
+                                         },
                 ["Data Science"] = new[]
                                                         {
                                                             "Data Analysis", "Machine Learning", "Big Data",
@@ -202,28 +214,27 @@ namespace ExamNest.Models
                                                         },
                 ["Cybersecurity"] = new[]
                                                          {
-                                                             "Network Security", "Ethical Hacking", "Cryptography",
-                                                             "Risk Management", "Forensics"
+                                                             "Network Security", "Ethical Hacking",
+                                                             "Cryptography", "Risk Management", "Forensics"
                                                          },
                 ["Cloud Computing"] = new[]
                                                            {
                                                                "Cloud Architecture", "Virtualization",
-                                                               "Containerization", "Cloud Integration", "Serverless"
+                                                               "Containerization", "Cloud Integration",
+                                                               "Serverless"
                                                            },
-                ["Artificial Intelligence"] = new[]
-                                                                   {
-                                                                       "NLP", "Computer Vision", "Deep Learning",
-                                                                       "AI Ethics", "Reinforcement Learning"
-                                                                   },
-                ["Mobile Development"] = new[]
-                                                              {
-                                                                  "iOS", "Android", "Cross-platform", "Mobile UX",
-                                                                  "App Testing"
-                                                              },
+                ["Artificial Intelligence"] =
+                                         new[]
+                                         {
+                                             "NLP", "Computer Vision", "Deep Learning", "AI Ethics",
+                                             "Reinforcement Learning"
+                                         },
+                ["Mobile Development"] =
+                                         new[] { "iOS", "Android", "Cross-platform", "Mobile UX", "App Testing" },
                 ["Web Development"] = new[]
                                                            {
-                                                               "Frontend", "Backend", "Full-Stack", "Web Security",
-                                                               "Performance Optimization"
+                                                               "Frontend", "Backend", "Full-Stack",
+                                                               "Web Security", "Performance Optimization"
                                                            }
             };
 
@@ -304,15 +315,15 @@ namespace ExamNest.Models
             return students;
         }
 
-        private static async Task<List<QuestionBank>> SeedQuestionBankAsync(AppDBContext context, List<Course> courses)
+        private static async Task<List<QuestionBank>> SeedQuestionBankAsync(
+            AppDBContext context, List<Course> courses, SeedCounts counts)
         {
-            // For each course, generate 10-20 multiple-choice questions with 4 choices each.
             var faker = new Faker();
             var questions = new List<QuestionBank>();
 
             foreach (var course in courses)
             {
-                int qCount = faker.Random.Int(10, 20);
+                int qCount = faker.Random.Int(counts.QuestionsPerCourseMin, counts.QuestionsPerCourseMax);
                 for (int i = 0; i < qCount; i++)
                 {
                     var question = new QuestionBank
@@ -324,9 +335,8 @@ namespace ExamNest.Models
                         Points = faker.Random.Int(1, 5)
                     };
                     context.QuestionBanks.Add(question);
-                    await context.SaveChangesAsync(); // To assign QuestionId
+                    await context.SaveChangesAsync();
 
-                    // Create 4 choices for this question.
                     for (char letter = 'A'; letter <= 'D'; letter++)
                     {
                         var choice = new Choice
@@ -346,15 +356,15 @@ namespace ExamNest.Models
             return questions;
         }
 
-        private static async Task<List<Exam>> SeedExamsAsync(AppDBContext context, List<Course> courses)
+        private static async Task<List<Exam>> SeedExamsAsync(AppDBContext context, List<Course> courses,
+                                                             SeedCounts counts)
         {
-            // Create 1-3 exams per course.
             var faker = new Faker();
             var exams = new List<Exam>();
 
             foreach (var course in courses)
             {
-                int examCount = faker.Random.Int(1, 3);
+                int examCount = faker.Random.Int(counts.ExamsPerCourseMin, counts.ExamsPerCourseMax);
                 for (int i = 0; i < examCount; i++)
                 {
                     var examDate = faker.Date.Recent(30);
@@ -376,21 +386,19 @@ namespace ExamNest.Models
         }
 
         private static async Task SeedExamQuestionsAsync(AppDBContext context, List<Exam> exams,
-                                                         List<QuestionBank> allQuestions)
+                                                         List<QuestionBank> allQuestions, SeedCounts counts)
         {
-            // For each exam, choose 5-10 random questions (matching its course) and link them.
             var faker = new Faker();
             foreach (var exam in exams)
             {
                 var courseQuestions = allQuestions.Where(q => q.CourseId == exam.CourseId).ToList();
                 if (!courseQuestions.Any()) continue;
 
-                int count = Math.Min(faker.Random.Int(5, 10), courseQuestions.Count);
+                int count = Math.Min(faker.Random.Int(counts.ExamQuestionsMin, counts.ExamQuestionsMax),
+                                     courseQuestions.Count);
                 var selected = faker.Random.Shuffle(courseQuestions).Take(count);
                 foreach (var question in selected)
                 {
-                    // Assuming that the many-to-many relationship is handled via the join table "ExamQuestion".
-                    // If you have a join entity type, add it via:
                     context.Set<ExamQuestion>().Add(new ExamQuestion
                     {
                         ExamId = exam.ExamId,
@@ -403,7 +411,8 @@ namespace ExamNest.Models
         }
 
         private static async Task SeedExamSubmissionsAsync(AppDBContext context, List<Exam> exams,
-                                                           List<Student> students, List<QuestionBank> questions)
+                                                           List<Student> students, List<QuestionBank> questions,
+                                                           SeedCounts counts)
         {
             var faker = new Faker();
             foreach (var exam in exams)
@@ -411,19 +420,18 @@ namespace ExamNest.Models
                 var course = await context.Courses.FindAsync(exam.CourseId);
                 if (course == null) continue;
 
-                // Select students in the same track as the course.
                 var trackStudents = students.Where(s => s.TrackId == course.TrackId).ToList();
                 if (!trackStudents.Any()) continue;
 
-                // Retrieve exam questions (from join table)
                 var examQuestionIds = await context.Set<ExamQuestion>()
                                                    .Where(eq => eq.ExamId == exam.ExamId)
                                                    .Select(eq => eq.QuestionId)
                                                    .ToListAsync();
                 if (!examQuestionIds.Any()) continue;
 
-                // Let 70-90% of the students take the exam.
-                int takeCount = (int)(trackStudents.Count * faker.Random.Double(0.7, 0.9));
+                int takeCount = (int)(trackStudents.Count *
+                                      faker.Random.Double(counts.StudentExamTakenRateMin,
+                                                          counts.StudentExamTakenRateMax));
                 var selectedStudents = faker.Random.Shuffle(trackStudents).Take(takeCount);
 
                 foreach (var student in selectedStudents)
@@ -435,7 +443,7 @@ namespace ExamNest.Models
                         SubmissionDate = faker.Date.Between(exam.ExamDate, exam.EndDate)
                     };
                     context.ExamSubmissions.Add(submission);
-                    await context.SaveChangesAsync(); // To get SubmissionId
+                    await context.SaveChangesAsync();
 
                     int totalPoints = 0;
                     int earnedPoints = 0;

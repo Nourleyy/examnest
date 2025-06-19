@@ -16,6 +16,7 @@ namespace ExamNest.Services
         {
             configuration = _configuration;
         }
+
         private SecurityTokenDescriptor TokenDescriptor(DateTime expiresIn, IEnumerable<Claim> claims = null)
         {
             var authSigningKey = new SymmetricSecurityKey
@@ -31,13 +32,12 @@ namespace ExamNest.Services
                            (authSigningKey, SecurityAlgorithms.HmacSha256)
             };
         }
+
         public string GenerateToken(IEnumerable<Claim> claims)
         {
-            var tokenDescriptor = TokenDescriptor(DateTime.Now.AddSeconds(30), claims);
+            var tokenDescriptor = TokenDescriptor(DateTime.Now.AddMinutes(30), claims);
             var token = jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
             return jwtSecurityTokenHandler.WriteToken(token);
-
-
         }
 
         public string GenerateRefreshToken()
@@ -47,32 +47,32 @@ namespace ExamNest.Services
             var token = jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
 
 
-
             return jwtSecurityTokenHandler.WriteToken(token);
-
-
         }
+
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
             var tokenValidationParameters = Identity.GetTokenValidationParameters(configuration);
-            tokenValidationParameters.ValidateLifetime = false; // here we are saying that we don't care about the token's expiration date
-            var principal = jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
+            tokenValidationParameters.ValidateLifetime =
+                false; // here we are saying that we don't care about the token's expiration date
+            var principal =
+                jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters,
+                                                      out SecurityToken validatedToken);
             return principal;
         }
+
         public bool ValidateToken(string token)
         {
-
-
             try
             {
-                jwtSecurityTokenHandler.ValidateToken(token, Identity.GetTokenValidationParameters(configuration), out SecurityToken validatedToken);
+                jwtSecurityTokenHandler.ValidateToken(token, Identity.GetTokenValidationParameters(configuration),
+                                                      out SecurityToken validatedToken);
                 return true;
             }
             catch (Exception)
             {
                 return false;
             }
-
         }
     }
 }

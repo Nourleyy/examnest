@@ -55,8 +55,8 @@ namespace ExamNest
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-            await app.Services.StartSeedAsync();
-
+            // await app.Services.StartSeedAsync();
+            // DataSeeder.InitializeAsync(app.Services, new SeedCounts());
             await app.RunAsync();
         }
     }
