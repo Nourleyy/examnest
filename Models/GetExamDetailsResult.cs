@@ -13,6 +13,8 @@ namespace ExamNest.Models
         [StringLength(100)]
         public string CourseName { get; set; }
         public DateTime ExamDate { get; set; }
+
+        public DateTime EndDate { get; set; }
         public int? QuestionCount { get; set; }
     }
 }
