@@ -10,8 +10,7 @@ namespace ExamNest.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize($"{nameof(Roles.Admin)},{nameof(Roles.Instructor)}")]
-
+    [Authorize(Roles = $"{nameof(Roles.Instructor)},{nameof(Roles.Admin)}")]
     public class StudentsController : ControllerBase
     {
         private readonly IStudentRepository studentRepository;
@@ -26,14 +25,12 @@ namespace ExamNest.Controllers
         [HttpGet]
         public async Task<IActionResult> GetStudents([FromQuery] int page = 1)
         {
-
             var students = await studentRepository.GetAll(page);
 
             return Ok(students);
         }
 
         [HttpGet("{id:int}")]
-
         public async Task<IActionResult> GetById(int id)
         {
             var student = await studentRepository.GetById(id);
@@ -43,10 +40,8 @@ namespace ExamNest.Controllers
         }
 
         [HttpPut]
-
         public async Task<IActionResult> UpdateStudent(UpdateDto Student, int id)
         {
-
             var isExisted = await studentRepository.GetById(id);
             if (isExisted == null)
             {
@@ -56,7 +51,6 @@ namespace ExamNest.Controllers
             var updated = await studentRepository.Update(id, _mapper.Map<Student>(Student));
 
 
-
             return RedirectToAction(nameof(GetById), new { id = updated });
         }
 
@@ -64,15 +58,14 @@ namespace ExamNest.Controllers
         [Authorize(Roles = $"{nameof(Roles.Admin)}")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
-
             var isExisted = await studentRepository.GetById(id);
             if (isExisted == null)
             {
                 return NotFound("No Student with this ID");
             }
+
             var deleted = await studentRepository.Delete(id);
             return Ok(deleted);
-
         }
     }
 }
